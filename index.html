@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Ficha do Jogador - Guerra Sombria</title>
+
+<style>
+body {
+    background: #1b1b1b;
+    font-family: Arial, sans-serif;
+    color: #fff;
+    padding: 10px;
+    display: block;
+}
+
+/* CONTAINER AJUSTADO (ZONA SEGURA) */
+#ficha {
+    width: 720px;
+    margin: auto;
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+/* EVITA QUEBRAS */
+.campo, textarea, .vida-box, .sanidade {
+    page-break-inside: avoid;
+}
+
+h1 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+h3 {
+    margin: 8px 0 5px;
+    font-size: 14px;
+}
+
+.linha { display: flex; gap: 8px; margin-bottom: 8px; }
+
+input, textarea {
+    width: 100%;
+    padding: 6px;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.campo {
+    background: #3a3a3a;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.campo label {
+    font-size: 10px;
+}
+
+.vida-box {
+    margin-top: 5px;
+    display: flex;
+    gap: 8px;
+}
+
+textarea {
+    height: 60px;
+    resize: none;
+}
+
+.sanidade {
+    display: flex;
+    gap: 4px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+}
+
+.box {
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    line-height: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    color: black;
+    font-size: 11px;
+}
+
+/* CORES */
+.v20 { background: #2ecc71; }
+.v18 { background: #58d68d; }
+.v16 { background: #82e0aa; }
+.v14 { background: #f7dc6f; }
+.v12 { background: #f4d03f; }
+.v10 { background: #f5b041; }
+.v8  { background: #eb984e; }
+.v6  { background: #e67e22; }
+.v5  { background: #dc7633; }
+.v4  { background: #cd6155; }
+.v3  { background: #c0392b; }
+.v2  { background: #a93226; }
+.v1  { background: #922b21; color: white; }
+
+.ativo { outline: 2px solid white; }
+
+button {
+    margin-top: 10px;
+    padding: 8px;
+    width: 100%;
+    background: darkred;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="ficha">
+
+<h1>FICHA DO JOGADOR<br><small>A Guerra Sombria</small></h1>
+
+<div class="linha">
+    <input type="text" placeholder="Personagem">
+    <input type="text" placeholder="Classe">
+</div>
+
+<div class="linha">
+    <input type="text" placeholder="Jogador">
+    <input type="number" placeholder="Nível">
+</div>
+
+<div class="grid">
+<div class="campo"><label>Força</label><input type="number"></div>
+<div class="campo"><label>Agilidade</label><input type="number"></div>
+<div class="campo"><label>Inteligência</label><input type="number"></div>
+
+<div class="campo"><label>Intimidação</label><input type="number"></div>
+<div class="campo"><label>Carisma</label><input type="number"></div>
+<div class="campo"><label>Resistência</label><input type="number"></div>
+
+<div class="campo"><label>Persuasão</label><input type="number"></div>
+<div class="campo"><label>Furtividade</label><input type="number"></div>
+<div class="campo"><label>História</label><input type="number"></div>
+</div>
+
+<div class="vida-box">
+    <input type="number" placeholder="Vida Máxima">
+    <input type="number" placeholder="HP Atual">
+</div>
+
+<h3>Sanidade</h3>
+
+<div class="sanidade" id="sanidade">
+<div class="box v20">20</div>
+<div class="box v18">18</div>
+<div class="box v16">16</div>
+<div class="box v14">14</div>
+<div class="box v12">12</div>
+<div class="box v10">10</div>
+<div class="box v8">8</div>
+<div class="box v6">6</div>
+<div class="box v5">5</div>
+<div class="box v4">4</div>
+<div class="box v3">3</div>
+<div class="box v2">2</div>
+<div class="box v1">1</div>
+</div>
+
+<h3>Ataques / Dados</h3>
+<textarea></textarea>
+
+<h3>Habilidades Extras</h3>
+<textarea></textarea>
+
+<h3>Inventário</h3>
+<textarea></textarea>
+
+<h3>Armadura</h3>
+<textarea></textarea>
+
+<h3>Anotações</h3>
+<textarea></textarea>
+
+<button onclick="exportar()">Exportar PDF</button>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+document.querySelectorAll(".box").forEach(box => {
+    box.addEventListener("click", () => {
+        document.querySelectorAll(".box").forEach(b => b.classList.remove("ativo"));
+        box.classList.add("ativo");
+    });
+});
+
+function exportar() {
+    const elemento = document.getElementById("ficha");
+
+    const opt = {
+        margin: 5,
+        filename: "Ficha_Guerra_Sombria.pdf",
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { 
+            scale: 1.1,
+            scrollY: 0
+        },
+        jsPDF: { 
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+        }
+    };
+
+    html2pdf().set(opt).from(elemento).save();
+}
+</script>
+
+</body>
+</html>
