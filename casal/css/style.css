@@ -594,3 +594,22 @@ button.card-resumo { font: inherit; text-align: left; cursor: pointer; color: in
 @media (max-width: 560px) { .deco-previa .mini-cena { max-width: 100%; } .previa-boneco { display: none; } .deco-boneco { grid-template-columns: 1fr; } }
 .ambientes { display: flex; margin-bottom: 8px; }
 .amostra.sem { background: repeating-linear-gradient(45deg, #fff 0 4px, #ddd 4px 8px); }
+
+/* v5: caminhada com passos, braço do regador */
+.ator .fr.pa, .ator .fr.pb { opacity: 0; }
+.ator.andando .fr.parado { opacity: 0; }
+.ator.andando .fr.pa { animation: quadroA .34s steps(1) infinite; }
+.ator.andando .fr.pb { animation: quadroB .34s steps(1) infinite; }
+@keyframes quadroA { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes quadroB { 0% { opacity: 0; } 50% { opacity: 1; } }
+.ator.regando .corpo { animation: inclinar 1s ease-in-out infinite; }
+@keyframes inclinar { 50% { transform: translateX(-.6px) translateY(.4px); } }
+.braco { transform-box: fill-box; transform-origin: 92% 70%; }
+.braco.sobe { animation: braco-sobe .45s ease-out forwards; }
+.braco.rega { animation: braco-rega .8s ease-in-out infinite; }
+.braco.desce { animation: braco-desce .35s ease-in forwards; }
+@keyframes braco-sobe { from { transform: rotate(-75deg); } to { transform: rotate(0); } }
+@keyframes braco-rega { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-14deg); } }
+@keyframes braco-desce { from { transform: rotate(0); } to { transform: rotate(-75deg); opacity: 0; } }
+.braco .agua { opacity: 0; }
+.braco.rega .agua { opacity: 1; }

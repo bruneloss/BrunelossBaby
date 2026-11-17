@@ -171,13 +171,21 @@ const Pixel = (() => {
   ];
   const espelhar = l => [...l].reverse().join('');
 
-  function personagem(cfg = {}, rosto = null) {
+  // Poses: passos da caminhada (pernas alternadas) e braço esquerdo livre para segurar o regador
+  const POSES = {
+    passoA: { inicio: 25, l: ['....OKKOOPPO....', '....OOOOOKKO....', '........OOOO....'] },
+    passoB: { inicio: 25, l: ['....OPPOOKKO....', '....OKKOOOOO....', '....OOOO........'] },
+    regar: { inicio: 16, l: ['   O', '   O', '   O', '   O', '   O', '    '] },
+  };
+
+  function personagem(cfg = {}, rosto = null, pose = null) {
     const p = { pele: 'branco', cabelo: 'castanho', penteado: 'curto', acessorio: 'nenhum', roupa: 'amarelo', corAcessorio: 'vermelho', ...cfg };
     const pele = PELES[p.pele] || PELES.branco, cab = CABELOS[p.cabelo] || CABELOS.castanho;
     let linhas = [...(CABECAS[p.penteado] || CABECAS.curto), ...CORPO];
     if (CAIMENTO[p.penteado]) linhas = sobrepor(linhas, CAIMENTO[p.penteado], 12);
     const enf = ENFEITES[p.acessorio];
     if (enf) linhas = sobrepor(linhas, enf.l, enf.inicio);
+    if (POSES[pose]) linhas = sobrepor(linhas, POSES[pose].l, POSES[pose].inicio);
     if (rosto === 'dir') linhas = sobrepor(linhas, ROSTO_DIR, 4);
     if (rosto === 'esq') linhas = sobrepor(linhas, ROSTO_DIR.map(espelhar), 4);
     const roupa = cor(p.roupa), acc = cor(p.corAcessorio);
@@ -192,7 +200,21 @@ const Pixel = (() => {
     if (p.penteado === 'coque' && !enf) pal.x = escurecer(cab[1], 0.3);
     return { linhas, pal };
   }
-  const desenharPersonagem = (cfg, x = 0, y = 0, rosto = null) => { const s = personagem(cfg, rosto); return grade(s.linhas, s.pal, x, y); };
+  const desenharPersonagem = (cfg, x = 0, y = 0, rosto = null, pose = null) => { const s = personagem(cfg, rosto, pose); return grade(s.linhas, s.pal, x, y); };
+
+  /* Boneco com quadros de animação: parado e dois passos (o CSS alterna quando está andando) */
+  const atorSVG = (cfg, rosto = null) =>
+    `<g class="fr parado">${desenharPersonagem(cfg, 0, 0, rosto)}</g>`
+    + `<g class="fr pa">${desenharPersonagem(cfg, 0, 0, rosto, 'passoA')}</g>`
+    + `<g class="fr pb">${desenharPersonagem(cfg, 0, 0, rosto, 'passoB')}</g>`;
+
+  /* Braço esquerdo levantado segurando o regador (desenhado fora do corpo, gira a partir do ombro) */
+  function bracoRegador(cfg = {}) {
+    const roupa = cor(cfg.roupa || 'amarelo'), pele = (PELES[cfg.pele] || PELES.branco)[1], O = '#1E1E1E';
+    return regador(-16, 8)
+      + rect(-5, 12, 8, 5, O) + rect(-4, 13, 6, 3, roupa) + rect(-4, 15, 6, 1, escurecer(roupa, 0.2))
+      + rect(-8, 11, 4, 5, O) + rect(-7, 12, 2, 3, pele);
+  }
 
   /* Regador (bico para a esquerda) */
   const REGADOR = [
@@ -318,7 +340,7 @@ const Pixel = (() => {
 
   return {
     grade, sobrepor, personagem, desenharPersonagem, caixa, rect, sofa, tv, rack, icone,
-    regador, PAREDES, PISOS, parede,
+    regador, PAREDES, PISOS, parede, atorSVG, bracoRegador,
     CORES, PELES, CABELOS, PENTEADOS, ACESSORIOS, SOFAS, TVS, RACKS, cor, clarear, escurecer, misturar,
   };
 })();

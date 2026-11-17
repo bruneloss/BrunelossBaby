@@ -70,7 +70,7 @@ const Cena = (() => {
     r.push('<g id="sentados">');
     ['A', 'B'].forEach(p => {
       const [x, y] = ASSENTO[p];
-      r.push(`<g id="ator-${p}" class="ator" style="transform: translate(${x}px, ${y}px)"><g class="corpo">${Pixel.desenharPersonagem(c[p])}</g><g class="extra"></g></g>`);
+      r.push(`<g id="ator-${p}" class="ator" style="transform: translate(${x}px, ${y}px)"><g class="corpo">${Pixel.atorSVG(c[p])}</g><g class="extra"></g></g>`);
     });
     r.push('</g><g id="efeitos"></g>');
 
@@ -87,7 +87,9 @@ const Cena = (() => {
   /* ---------- animações ---------- */
   let ocupado = false;
   const ator = p => document.getElementById('ator-' + p);
-  const rosto = (p, lado) => { const el = ator(p); if (el) U.$('.corpo', el).innerHTML = Pixel.desenharPersonagem(casa()[p], 0, 0, lado); };
+  const rosto = (p, lado) => { const el = ator(p); if (el) U.$('.corpo', el).innerHTML = Pixel.atorSVG(casa()[p], lado); };
+  // trocar o boneco de camada sem "teletransporte": o navegador precisa registrar a posição antes de animar
+  const firmar = el => { el.style.transition = 'none'; void el.getBoundingClientRect(); };
   async function mover(el, x, y, ms, andando = true) {
     el.classList.toggle('andando', andando);
     el.style.transition = `transform ${ms}ms linear`;
@@ -101,6 +103,7 @@ const Cena = (() => {
     const el = ator(p); const [x] = ASSENTO[p];
     await mover(el, x, EM_PE, 260, false);
     document.getElementById('em-pe')?.appendChild(el); // em pé fica na frente da TV
+    firmar(el);
     return el;
   }
   async function sentar(p) {
@@ -108,6 +111,7 @@ const Cena = (() => {
     await andarAte(el, x);
     const sent = document.getElementById('sentados');
     if (sent) { if (p === 'A') sent.insertBefore(el, sent.firstChild); else sent.appendChild(el); }
+    firmar(el);
     await mover(el, x, y, 260, false);
   }
 
@@ -121,19 +125,25 @@ const Cena = (() => {
   function regar(p) {
     return cena(async () => {
       const el = await levantar(p);
-      await andarAte(el, 22);
-      rosto(p, 'esq'); // vira para a planta
-      const extra = U.$('.extra', el);
-      // mão segurando o regador na altura do peito; ele inclina e a água cai no vaso
-      extra.innerHTML = `<g class="regador">${Pixel.regador(-10, 9)}</g>`
-        + Pixel.rect(-1, 14, 2, 2, Pixel.PELES[casa()[p].pele]?.[1] || '#F6D2B8')
-        + `<g class="agua">${[0, 1, 2, 3].map(i => `<rect class="pingo p${i}" x="${-11 - (i % 2)}" y="12" width="1" height="2" fill="#7CC4FF"/>`).join('')}</g>`;
-      await sleep(600);
+      await andarAte(el, 25);
+      const cfg = casa()[p], corpo = U.$('.corpo', el), extra = U.$('.extra', el);
+      // o braço esquerdo sai do corpo, sobe com o regador, inclina e a água cai no vaso
+      corpo.innerHTML = Pixel.desenharPersonagem(cfg, 0, 0, null, 'regar');
+      extra.innerHTML = `<g class="braco sobe">${Pixel.bracoRegador(cfg)}`
+        + `<g class="agua">${[0, 1, 2, 3].map(i => `<rect class="pingo p${i}" x="${-17 + (i % 2)}" y="11" width="1" height="2" fill="#7CC4FF"/>`).join('')}</g></g>`;
+      el.classList.add('regando');
+      const braco = U.$('.braco', extra);
+      await sleep(450);
+      braco.classList.replace('sobe', 'rega');
+      await sleep(700);
       document.getElementById('planta-regada')?.style.removeProperty('display');
       U.$$('.gota-sede').forEach(g => g.remove());
-      await sleep(1500);
+      await sleep(1400);
+      braco.classList.replace('rega', 'desce');
+      await sleep(350);
+      el.classList.remove('regando');
       extra.innerHTML = '';
-      rosto(p, null);
+      corpo.innerHTML = Pixel.atorSVG(cfg);
       await sentar(p);
     });
   }
@@ -161,9 +171,7 @@ const Cena = (() => {
     return cena(async () => {
       const el = await levantar(p);
       await andarAte(el, 108);
-      rosto(p, 'dir');
       el.classList.add('pula'); await sleep(800); el.classList.remove('pula');
-      rosto(p, null);
       await sentar(p);
     });
   }
