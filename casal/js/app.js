@@ -7,7 +7,12 @@ const App = (() => {
   ];
   let atual = null, pendente = null, segurando = false, adiado = false;
   /* Enquanto um boneco anda pela sala, não redesenha a tela (senão a animação some) */
-  function segurar(v) { segurando = v; if (!v && adiado) { adiado = false; agendar(); } }
+  function segurar(v) {
+    segurando = v;
+    // um redesenho já agendado também espera a animação terminar (senão o boneco "duplica")
+    if (v && pendente) { clearTimeout(pendente); pendente = null; adiado = true; }
+    if (!v && adiado) { adiado = false; agendar(); }
+  }
   const view = () => U.$('#view');
 
   function rota() { const r = location.hash.slice(1); return ROTAS.some(x => x[0] === r) ? r : 'inicio'; }
@@ -40,7 +45,11 @@ const App = (() => {
     document.title = `${ROTAS.find(x => x[0] === r)[2]} · Nosso Cantinho`;
   }
   // agrupa várias alterações e espera o foco mudar de campo antes de redesenhar
-  const agendar = () => { if (segurando) { adiado = true; return; } clearTimeout(pendente); pendente = setTimeout(render, 0); };
+  const agendar = () => {
+    if (segurando) { adiado = true; return; }
+    clearTimeout(pendente);
+    pendente = setTimeout(() => { pendente = null; if (segurando) adiado = true; else render(); }, 0);
+  };
 
   /* A música escolhida é do casal: se o outro trocar, troca aqui também */
   function sincronizarMusica() {
