@@ -88,7 +88,7 @@ Views.tarefas = (() => {
     });
     U.$$('[data-feito]', el).forEach(c => c.onchange = () => {
       if (c.checked) { const r = c.getBoundingClientRect(); U.coracoes(r.left, r.top, 5); }
-      Store.atualizar(s => { const t = lista(s, dia).find(x => x.id === c.dataset.feito); t.feito = c.checked; });
+      Store.atualizar(s => { const t = lista(s, dia).find(x => x.id === c.dataset.feito); t.feito = c.checked; Amor.somar(s, c.checked ? 8 : -8, 'tarefa'); });
     });
     U.$$('[data-tirar]', el).forEach(b => b.onclick = () =>
       Store.atualizar(s => { s.tarefas.dias[dia] = lista(s, dia).filter(x => x.id !== b.dataset.tirar); }, { registrar: false }));

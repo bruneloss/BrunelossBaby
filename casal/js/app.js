@@ -2,17 +2,19 @@
 
 const App = (() => {
   const ROTAS = [
-    ['inicio', '🏠', 'Início'], ['tarefas', '🧹', 'Tarefas'], ['mercado', '🛒', 'Mercado'], ['sonhos', '🌈', 'Sonhos'],
-    ['financas', '📊', 'Finanças'], ['contas', '💸', 'Contas'], ['agenda', '📅', 'Agenda'],
+    ['inicio', 'Início'], ['tarefas', 'Tarefas'], ['mercado', 'Mercado'], ['sonhos', 'Sonhos'],
+    ['financas', 'Finanças'], ['contas', 'Contas'], ['agenda', 'Agenda'], ['relax', 'Relaxamento'],
   ];
-  let atual = null, pendente = null;
+  let atual = null, pendente = null, segurando = false, adiado = false;
+  /* Enquanto um boneco anda pela sala, não redesenha a tela (senão a animação some) */
+  function segurar(v) { segurando = v; if (!v && adiado) { adiado = false; agendar(); } }
   const view = () => U.$('#view');
 
   function rota() { const r = location.hash.slice(1); return ROTAS.some(x => x[0] === r) ? r : 'inicio'; }
 
   function nav() {
     const e = Store.get(), eu = Local.get().eu;
-    U.$('#menu').innerHTML = ROTAS.map(([id, ic, nome]) => `<a href="#${id}" class="${id === atual ? 'ativo' : ''}"><span class="ic">${ic}</span><span>${nome}</span>${id === 'inicio' && Views.inicio.totalAlertas() ? '<i class="ponto-alerta"></i>' : ''}</a>`).join('');
+    U.$('#menu').innerHTML = ROTAS.map(([id, nome]) => `<a href="#${id}" class="${id === atual ? 'ativo' : ''}"><span class="ic">${Pixel.icone(id)}</span><span>${nome}</span>${id === 'inicio' && Views.inicio.totalAlertas() ? '<i class="ponto-alerta"></i>' : ''}</a>`).join('');
     U.$('#quemSou').innerHTML = eu ? `<span class="avatar ${eu.toLowerCase()}">${U.esc(Store.nome(eu)).slice(0, 1).toUpperCase()}</span>` : '👤';
     U.$('#quemSou').title = eu ? `Usando como ${Store.nome(eu)}` : 'Escolher quem está usando';
     const [st] = Sync.status();
@@ -35,16 +37,24 @@ const App = (() => {
       if (novo) { novo.focus({ preventScroll: true }); if (sel) try { novo.setSelectionRange(...sel); } catch (e) {} }
     }
     nav();
-    document.title = `${ROTAS.find(x => x[0] === r)[2]} · Nosso Cantinho`;
+    document.title = `${ROTAS.find(x => x[0] === r)[1]} · Nosso Cantinho`;
   }
   // agrupa várias alterações e espera o foco mudar de campo antes de redesenhar
-  const agendar = () => { clearTimeout(pendente); pendente = setTimeout(render, 0); };
+  const agendar = () => { if (segurando) { adiado = true; return; } clearTimeout(pendente); pendente = setTimeout(render, 0); };
+
+  /* A música escolhida é do casal: se o outro trocar, troca aqui também */
+  function sincronizarMusica() {
+    const f = Store.get().casa?.musica?.faixa || null;
+    if (!f) { if (Musica.atual()) Musica.parar(); return; }
+    if (f !== Musica.atual() && !Musica.mudo()) Musica.tocarQuandoPuder(f);
+  }
 
   function config() {
     const desenhar = m => {
       const e = Store.get(), L = Local.get();
       const [st, det] = Sync.status();
       m.render(`
+        <button class="btn primario largo" id="abrirConvite">🏠 Convidar meu amor para a casa</button>
         <h3 class="sub">💑 O casal</h3>
         <form class="form-grade" id="fCasal">
           <label>Nome 1<input name="A" value="${U.esc(e.casal.A)}" maxlength="24" required></label>
@@ -81,6 +91,7 @@ const App = (() => {
         Store.atualizar(s => { s.casal.A = f.A.value.trim(); s.casal.B = f.B.value.trim(); s.casal.desde = f.desde.value; });
         U.toast('Nomes salvos 💚'); desenhar(m);
       };
+      U.$('#abrirConvite', m.el).onclick = () => Casa.convite();
       U.$$('[data-eu]', m.el).forEach(b => b.onclick = () => { Local.set('eu', b.dataset.eu); nav(); desenhar(m); agendar(); });
       const fs = U.$('#fSync', m.el);
       if (fs) fs.onsubmit = ev => {
@@ -156,10 +167,16 @@ const App = (() => {
     U.$('#statusSync').onclick = config;
     window.addEventListener('hashchange', render);
     Store.assinar(agendar);
+    Store.assinar(sincronizarMusica);
+    Musica.ouvir(() => { if (rota() === 'inicio') agendar(); });
     Sync.ouvir(() => nav());
+    U.$('.logo').innerHTML = `${Pixel.icone('coracao')} <span>Nosso Cantinho</span>`;
+    U.$('#config').innerHTML = Pixel.icone('config');
     render();
     // espera os dados compartilhados antes de decidir entre boas-vindas e "quem é você?"
     await Sync.iniciar();
+    await Casa.iniciar();
+    sincronizarMusica();
     const e = Store.get();
     const semNomes = e.casal.A === 'Amor 1' && e.casal.B === 'Amor 2';
     if (!Local.get().eu && semNomes && !e.diasAtivos.length) boasVindas();
@@ -169,7 +186,7 @@ const App = (() => {
     setInterval(() => { if (U.hoje() !== dia) { dia = U.hoje(); render(); } }, 60000);
   }
 
-  return { render, iniciar };
+  return { render, iniciar, segurar };
 })();
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', App.iniciar); else App.iniciar();

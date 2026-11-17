@@ -1,158 +1,4 @@
-/* Tela inicial: casal pixelado no sofá, TV com recadinhos, ofensiva de dias e alerta de prioridades */
-
-const Pixel = (() => {
-  const PAL = {
-    O: '#1E1E1E', H: '#3B2A20', h: '#5C4233', S: '#F2C29B', s: '#D9A27C', Y: '#FFD23F', y: '#E5B520',
-    R: '#7A3B1E', r: '#A0522D', B: '#FFD23F', W: '#FFFFFF', w: '#E4E4E4', G: '#2E9E5B', g: '#1F7A43',
-    L: '#4CC17A', P: '#FF8FA3', K: '#C98A2E',
-  };
-  const SPRITES = {
-    // Pessoa A: cabelo curto, blusa amarela (vista de costas)
-    A: [
-      '.....OOOOOO.....',
-      '...OOHHHHHHOO...',
-      '..OHHHhhHHHHHO..',
-      '.OHHHhhHHHHHHHO.',
-      '.OHHHHHHHHHHHHO.',
-      'OHHHHHHHHHHHHHHO',
-      'OHHHHHHHHHHHHHHO',
-      'OHHHHHHHHHHHHHHO',
-      'OSHHHHHHHHHHHHSO',
-      'OSHHHHHHHHHHHHSO',
-      '.OsHHHHHHHHHHsO.',
-      '..OOHHHHHHHHOO..',
-      '....OsSSSSsO....',
-      '..OOOsSSSSsOOO..',
-      '.OYYYYYYYYYYYYO.',
-      'OYYYYYYYYYYYYYYO',
-      'OYYYYYYYYYYYYYYO',
-      'OyYYYYYYYYYYYYyO',
-      'OyYYYYYYYYYYYYyO',
-      'OyYYYYYYYYYYYYyO',
-    ],
-    // Pessoa B: cabelo comprido com lacinho amarelo, blusa branca
-    B: [
-      '.....OOOOOO.....',
-      '...OORRRRRROO...',
-      '..ORRRrrRRBRBO..',
-      '.ORRRrrRRRRBBRO.',
-      '.ORRRRRRRRBRBRO.',
-      'ORRRRRRRRRRRRRRO',
-      'ORRRRRRRRRRRRRRO',
-      'ORRRRRRRRRRRRRRO',
-      'ORRRRRRRRRRRRRRO',
-      'ORRRRRRRRRRRRRRO',
-      'ORRRRRRRRRRRRRRO',
-      'ORRRrRRRRRRrRRRO',
-      'ORRRRRRRRRRRRRRO',
-      'ORRRRRRRRRRRRRRO',
-      'OWRRRRRRRRRRRRWO',
-      'OWWRRRRRRRRRRWWO',
-      'OWWWRRRRRRRRWWWO',
-      'OwWWWRRRRRRWWWwO',
-      'OwWWWWRRRRWWWWwO',
-      'OwWWWWWRRWWWWWwO',
-    ],
-    coracao: [
-      '.OO.OO.',
-      'OPPOPPO',
-      'OPPPPPO',
-      '.OPPPO.',
-      '..OPO..',
-      '...O...',
-    ],
-    coracaoQuadro: [
-      '.GG.GG.',
-      'GGGGGGG',
-      'GGGGGGG',
-      '.GGGGG.',
-      '..GGG..',
-      '...G...',
-    ],
-  };
-  // Converte a grade de caracteres em retângulos SVG (juntando pixels vizinhos da mesma cor)
-  function sprite(nome, x0, y0, escala = 1) {
-    let out = '';
-    SPRITES[nome].forEach((linha, y) => {
-      let x = 0;
-      while (x < linha.length) {
-        const c = linha[x];
-        if (c === '.') { x++; continue; }
-        let w = 1;
-        while (linha[x + w] === c) w++;
-        out += `<rect x="${x0 + x * escala}" y="${y0 + y * escala}" width="${w * escala}" height="${escala}" fill="${PAL[c]}"/>`;
-        x += w;
-      }
-    });
-    return out;
-  }
-  return { sprite, PAL };
-})();
-
-function cenaSVG() {
-  const r = [];
-  const R = (x, y, w, h, c, extra = '') => r.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}" ${extra}/>`);
-  // caixa com cantos "pixelados" arredondados
-  const caixa = (x, y, w, h, borda, cor) => {
-    R(x + 2, y, w - 4, h, borda); R(x + 1, y + 1, w - 2, h - 2, borda); R(x, y + 2, w, h - 4, borda);
-    R(x + 2, y + 1, w - 4, h - 2, cor); R(x + 1, y + 2, w - 2, h - 4, cor);
-  };
-
-  // Parede com listras e piso de madeira amarelinho
-  R(0, 0, 160, 72, '#E5F6EB');
-  for (let x = 3; x < 160; x += 10) R(x, 0, 4, 68, '#D6EFDF');
-  for (let x = 8; x < 160; x += 20) for (let y = 6; y < 66; y += 14) R(x, y, 1, 1, '#FFFFFF');
-  R(0, 66, 160, 2, '#FFFFFF'); R(0, 68, 160, 1, '#1E1E1E');
-  R(0, 69, 160, 31, '#F6D77A');
-  for (let y = 74; y < 100; y += 6) R(0, y, 160, 1, '#E6C155');
-  for (let i = 0; i < 8; i++) R((i * 23 + (i % 2) * 9) % 160, 69 + (i % 5) * 6, 1, 5, '#E6C155');
-
-  // Quadro com coração
-  caixa(10, 14, 22, 20, '#1E1E1E', '#FFFFFF');
-  r.push(Pixel.sprite('coracaoQuadro', 14, 18, 2));
-  R(20, 10, 2, 4, '#1E1E1E');
-
-  // Planta
-  R(6, 46, 3, 8, '#2E9E5B'); R(10, 42, 3, 12, '#1F7A43'); R(14, 47, 3, 7, '#2E9E5B');
-  R(4, 44, 4, 3, '#4CC17A'); R(12, 39, 4, 4, '#4CC17A'); R(15, 45, 4, 3, '#4CC17A');
-  caixa(4, 53, 16, 15, '#1E1E1E', '#FFD23F'); R(6, 56, 12, 1, '#E5B520');
-
-  // Luminária com brilho
-  r.push('<circle cx="147" cy="34" r="14" fill="#FFD23F" opacity=".22" class="brilho"/>');
-  R(146, 34, 2, 34, '#1E1E1E'); R(141, 66, 12, 3, '#1E1E1E');
-  R(140, 26, 14, 2, '#1E1E1E'); R(139, 28, 16, 6, '#1E1E1E'); R(141, 28, 12, 5, '#FFD23F'); R(140, 33, 14, 1, '#1E1E1E');
-
-  // Rack da TV
-  caixa(44, 52, 72, 16, '#1E1E1E', '#3A3A3A');
-  R(47, 56, 31, 9, '#2B2B2B'); R(82, 56, 31, 9, '#2B2B2B');
-  R(61, 60, 3, 1, '#FFD23F'); R(96, 60, 3, 1, '#FFD23F');
-
-  // TV retrô com antena
-  for (let i = 0; i < 8; i++) { R(72 - i, 8 - i, 1, 1, '#1E1E1E'); R(88 + i, 8 - i, 1, 1, '#1E1E1E'); }
-  R(63, 0, 2, 2, '#FFD23F'); R(95, 0, 2, 2, '#FFD23F');
-  caixa(42, 8, 76, 44, '#1E1E1E', '#2E9E5B');
-  R(45, 11, 70, 38, '#1E1E1E');
-  R(46, 12, 68, 36, '#0E2A1A');
-  R(108, 49, 2, 2, '#FFD23F'); R(112, 49, 2, 2, '#FF5A5A');
-  R(56, 52, 4, 1, '#1E1E1E'); R(100, 52, 4, 1, '#1E1E1E');
-
-  // Casal (de costas) e coraçãozinho
-  r.push(`<g class="pessoa-a">${Pixel.sprite('A', 58, 50)}</g>`);
-  r.push(`<g class="pessoa-b">${Pixel.sprite('B', 86, 50)}</g>`);
-  r.push(`<g class="coracao-bob">${Pixel.sprite('coracao', 77, 57)}</g>`);
-
-  // Sofá (visto de trás)
-  R(14, 97, 132, 3, 'rgba(0,0,0,.18)');
-  caixa(13, 71, 15, 28, '#1E1E1E', '#2E9E5B'); R(15, 73, 11, 2, '#4CC17A');
-  caixa(132, 71, 15, 28, '#1E1E1E', '#2E9E5B'); R(134, 73, 11, 2, '#4CC17A');
-  caixa(23, 66, 114, 33, '#1E1E1E', '#3DB56A');
-  R(25, 67, 110, 3, '#5FD08A');
-  R(52, 71, 1, 26, '#2A8A4F'); R(108, 71, 1, 26, '#2A8A4F');
-  [38, 66, 94, 122].forEach(x => R(x, 82, 2, 2, '#2A8A4F'));
-  R(20, 98, 4, 2, '#1E1E1E'); R(136, 98, 4, 2, '#1E1E1E');
-
-  return `<svg class="cena-svg" viewBox="0 0 160 100" shape-rendering="crispEdges" aria-hidden="true">${r.join('')}</svg>`;
-}
+/* Tela inicial: casal no sofá, TV com recadinhos, ofensiva, alerta, nível de amor e toca-discos */
 
 Views.inicio = (() => {
   let tvTimer = null, tvIdx = 0;
@@ -198,11 +44,22 @@ Views.inicio = (() => {
     const ativoHoje = Store.get().diasAtivos.includes(U.hoje());
     const alertas = totalAlertas();
     const e = Store.get();
+    const cena = Cena.svg(), t = cena.tela;
+    const nv = Amor.nivel(), med = Amor.medidor();
+    const faixa = Cena.casa().musica?.faixa;
+    const pendente = Musica.pendente() && !Musica.atual();
+    const p = eu();
     el.innerHTML = `
     <section class="inicio">
       <div class="cena">
-        ${cenaSVG()}
-        <button class="tv-tela" id="tvTela" aria-label="Recadinhos do dia na TV">
+        ${cena.svg}
+        <button class="ponto-clique" id="hsPlanta" style="left:1%;top:34%;width:14%;height:35%" aria-label="Regar a planta"></button>
+        <button class="ponto-clique" id="hsDisco" style="left:77.5%;top:45%;width:12.5%;height:24%" aria-label="Toca-discos"></button>
+        <button class="ponto-clique" id="hsAmor" style="left:6%;top:11%;width:15%;height:24%" aria-label="Nível de amor"></button>
+        <button class="ponto-clique" id="hsA" style="left:36.25%;top:50%;width:10%;height:16%" aria-label="${U.esc(e.casal.A)}"></button>
+        <button class="ponto-clique" id="hsB" style="left:53.75%;top:50%;width:10%;height:16%" aria-label="${U.esc(e.casal.B)}"></button>
+        <span class="nivel-tag">Nv ${nv.n} · ${med}%</span>
+        <button class="tv-tela ${Cena.casa().tv.estilo}" id="tvTela" aria-label="Recadinhos do dia na TV" style="left:${t.x / 1.6}%;top:${t.y}%;width:${t.w / 1.6}%;height:${t.h}%">
           <span class="tv-msg"></span><span class="tv-autor"></span>
         </button>
         <button class="ofensiva ${ativoHoje ? '' : 'apagada'}" id="ofensiva" aria-label="Dias seguidos usando o app">
@@ -213,13 +70,29 @@ Views.inicio = (() => {
           ${alertas ? `<span class="badge">${alertas}</span>` : ''}
         </button>
         <div class="nomes-sofa"><span class="tag a">${U.esc(e.casal.A)}</span><span class="tag b">${U.esc(e.casal.B)}</span></div>
+        <div class="cena-botoes">
+          <button class="chip-cena" id="btnDecorar">${Pixel.icone('pincel')} Decorar</button>
+          ${faixa ? `<button class="chip-cena ${pendente ? 'pisca-suave' : ''}" id="btnSom">${Musica.atual() ? (Musica.mudo() ? '🔇' : '🎵') : '▶'} ${U.esc(Musica.FAIXAS[faixa]?.nome || '')}${pendente ? ' · toque para ouvir' : ''}</button>` : ''}
+        </div>
       </div>
+      <p class="dica-cena">Toque em você para agir, no seu amor para dar um beijinho, na planta para regar e no toca-discos para escolher a música.</p>
       ${resumoHoje()}
     </section>`;
 
     U.$('#tvTela', el).onclick = abrirMensagens;
     U.$('#alerta', el).onclick = abrirPrioridades;
     U.$('#ofensiva', el).onclick = abrirOfensiva;
+    U.$('#hsAmor', el).onclick = Amor.abrir;
+    U.$('#hsPlanta', el).onclick = regar;
+    U.$('#hsDisco', el).onclick = abrirDiscos;
+    U.$('#btnDecorar', el).onclick = () => Decorar.abrir();
+    U.$('#hs' + p, el).onclick = ev => menuAcoes(ev);
+    U.$('#hs' + outro(p), el).onclick = beijar;
+    const som = U.$('#btnSom', el);
+    if (som) som.onclick = () => {
+      if (Musica.atual()) { Musica.setMudo(!Musica.mudo()); App.render(); }
+      else if (faixa) { Musica.setMudo(false); Musica.tocar(faixa); }
+    };
     mostrarFrase(false);
     clearInterval(tvTimer);
     tvTimer = setInterval(() => mostrarFrase(true), 5500);
@@ -235,6 +108,109 @@ Views.inicio = (() => {
       tela.classList.add('chiado');
       setTimeout(() => { aplicar(); tela.classList.remove('chiado'); }, 350);
     } else aplicar();
+  }
+
+  /* ---------- Ações dos personagens ---------- */
+  async function regar() {
+    const p = eu();
+    if (!(await Cena.regar(p))) return;
+    let ganhou = 0;
+    Store.atualizar(s => {
+      s.casa = { ...CASA_PADRAO(), ...(s.casa || {}) };
+      s.casa.planta = U.hoje();
+      const d = Amor.dia(s);
+      if (!d.rega[p]) { d.rega[p] = 1; ganhou = Amor.somar(s, 10, 'rega'); }
+    });
+    U.toast(ganhou ? '🪴 Plantinha regada! +10 de amor' : '🪴 Plantinha regada de novo. Ela agradece!');
+  }
+
+  async function beijar() {
+    const p = eu();
+    if (!(await Cena.beijar(p))) return;
+    let ganhou = 0;
+    Store.atualizar(s => {
+      const d = Amor.dia(s);
+      d.beijos[p] = (d.beijos[p] || 0) + 1;
+      if (d.beijos[p] <= 6) ganhou = Amor.somar(s, 6, 'beijo');
+    });
+    U.toast(ganhou ? `💋 Beijinho em ${U.esc(Store.nome(outro(p)))}! +6 de amor` : '💋 Beijinho dado! (os pontos de beijo de hoje já acabaram)');
+  }
+
+  function menuAcoes(ev) {
+    U.$$('.popover').forEach(x => x.remove());
+    const pop = document.createElement('div');
+    pop.className = 'popover';
+    pop.innerHTML = `<small>O que ${U.esc(Store.nome(eu()))} vai fazer?</small>
+      <button class="btn mini" data-a="beijo">💋 Dar um beijinho</button>
+      <button class="btn mini" data-a="regar">🪴 Regar a planta</button>
+      <button class="btn mini" data-a="musica">🎵 Escolher música</button>
+      <button class="btn mini" data-a="decorar">🎨 Mudar meu visual</button>`;
+    pop.style.left = Math.min(ev.clientX, innerWidth - 200) + 'px';
+    pop.style.top = Math.min(ev.clientY + 10, innerHeight - 220) + 'px';
+    document.body.appendChild(pop);
+    const fechar = () => { pop.remove(); document.removeEventListener('pointerdown', fora); };
+    const fora = e2 => { if (!pop.contains(e2.target)) fechar(); };
+    setTimeout(() => document.addEventListener('pointerdown', fora), 0);
+    U.$$('[data-a]', pop).forEach(b => b.onclick = () => {
+      fechar();
+      ({ beijo: beijar, regar, musica: abrirDiscos, decorar: () => Decorar.abrir(eu()) })[b.dataset.a]();
+    });
+  }
+
+  /* ---------- Toca-discos ---------- */
+  function abrirDiscos() {
+    const m = U.modal({ titulo: '🎵 Toca-discos', aoAbrir: mm => desenhar(mm) });
+    function desenhar(mm) {
+      const c = Cena.casa(), votos = c.votos || {}, atual = c.musica?.faixa;
+      const nota = id => { const v = votos[id] || {}; return (v.A || 0) + (v.B || 0); };
+      const lista = Object.entries(Musica.FAIXAS).sort((a, b) => nota(b[0]) - nota(a[0]));
+      mm.render(`
+        <p class="dica">Escolha um disco: seu boneco vai até o toca-discos e a música fica tocando para vocês dois sempre que entrarem.</p>
+        <ul class="discos">
+          ${lista.map(([id, f]) => {
+            const v = votos[id] || {}, meu = v[eu()] || 0;
+            return `<li class="${id === atual ? 'atual' : ''}">
+              <span class="capa" style="background:${f.capa}"><i></i></span>
+              <div class="disco-info"><b>${U.esc(f.nome)}</b><small>${f.estilo}${id === atual ? ` · tocando agora` : ''}</small>
+                <small class="votos">${['A', 'B'].map(q => v[q] ? `${v[q] > 0 ? '👍' : '👎'} ${U.esc(Store.nome(q))}` : '').filter(Boolean).join(' · ')}</small></div>
+              <button class="btn-icone ${meu > 0 ? 'votado' : ''}" data-voto="${id}" data-v="1" aria-label="Gostei">👍</button>
+              <button class="btn-icone ${meu < 0 ? 'votado' : ''}" data-voto="${id}" data-v="-1" aria-label="Não gostei">👎</button>
+              <button class="btn mini ${id === atual ? '' : 'primario'}" data-tocar="${id}">${id === atual && Musica.atual() ? '■ Parar' : '▶ Tocar'}</button>
+            </li>`;
+          }).join('')}
+        </ul>
+        <label class="volume">🔈 Volume (só neste aparelho)<input type="range" min="0" max="1" step="0.05" value="${Musica.volume()}" id="vol"></label>`);
+      U.$('#vol', mm.el).oninput = ev => Musica.setVolume(+ev.target.value);
+      U.$$('[data-voto]', mm.el).forEach(b => b.onclick = () => {
+        const id = b.dataset.voto, v = +b.dataset.v, q = eu();
+        Store.atualizar(s => {
+          s.casa = { ...CASA_PADRAO(), ...(s.casa || {}) };
+          const vv = (s.casa.votos[id] = s.casa.votos[id] || {});
+          if (vv[q] === v) delete vv[q]; else vv[q] = v;
+        }, { registrar: false });
+        desenhar(mm);
+      });
+      U.$$('[data-tocar]', mm.el).forEach(b => b.onclick = async () => {
+        const id = b.dataset.tocar;
+        if (id === atual && Musica.atual()) {
+          Musica.parar();
+          Store.atualizar(s => { s.casa = { ...CASA_PADRAO(), ...(s.casa || {}) }; s.casa.musica = { faixa: null }; }, { registrar: false });
+          return desenhar(mm);
+        }
+        mm.fechar();
+        Musica.setMudo(false);
+        Musica.tocar(id);
+        if (location.hash.slice(1) === 'inicio' || !location.hash) await Cena.irAoTocaDiscos(eu());
+        Store.atualizar(s => {
+          s.casa = { ...CASA_PADRAO(), ...(s.casa || {}) };
+          s.casa.musica = { faixa: id, por: eu(), em: Date.now() };
+          const d = Amor.dia(s);
+          if (!d.motivos.musica) Amor.somar(s, 3, 'musica');
+        });
+        U.toast(`🎵 Tocando "${U.esc(Musica.FAIXAS[id].nome)}"`);
+      });
+    }
+    return m;
   }
 
   /* ---------- Recadinhos ---------- */
@@ -263,7 +239,7 @@ Views.inicio = (() => {
           U.$('form', m.el).onsubmit = ev => {
             ev.preventDefault();
             const texto = ev.target.texto.value.trim(); if (!texto) return;
-            Store.atualizar(s => s.mensagens.push({ id: U.uid(), data: U.hoje(), autor, texto, criado: Date.now() }));
+            Store.atualizar(s => { s.mensagens.push({ id: U.uid(), data: U.hoje(), autor, texto, criado: Date.now() }); Amor.somar(s, 12, 'recado'); });
             tvIdx = Store.get().mensagens.filter(x => x.data === U.hoje()).length - 1;
             mostrarFrase(false);
             const r = ev.target.getBoundingClientRect(); U.coracoes(r.left + r.width / 2, r.top);
@@ -322,6 +298,7 @@ Views.inicio = (() => {
             setTimeout(() => {
               Store.atualizar(s => {
                 const p = s.prioridades.find(x => x.id === c.dataset.feito); p.feito = true; p.feitoEm = U.hoje();
+                Amor.somar(s, 8, 'prioridade');
                 const limite = U.addDias(U.hoje(), -30);
                 s.prioridades = s.prioridades.filter(x => !x.feito || x.feitoEm >= limite);
               });
@@ -329,7 +306,7 @@ Views.inicio = (() => {
             }, 380);
           });
           U.$$('[data-desfazer]', m.el).forEach(c => c.onchange = () => {
-            Store.atualizar(s => { const p = s.prioridades.find(x => x.id === c.dataset.desfazer); p.feito = false; delete p.feitoEm; });
+            Store.atualizar(s => { const p = s.prioridades.find(x => x.id === c.dataset.desfazer); p.feito = false; delete p.feitoEm; Amor.somar(s, -8, 'prioridade'); });
             desenhar();
           });
           U.$$('[data-apagar]', m.el).forEach(b => b.onclick = () => {
@@ -370,5 +347,5 @@ Views.inicio = (() => {
     });
   }
 
-  return { render, sair: () => clearInterval(tvTimer), totalAlertas };
+  return { render, sair: () => clearInterval(tvTimer), totalAlertas, abrirDiscos };
 })();

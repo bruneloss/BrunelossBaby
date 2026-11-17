@@ -39,6 +39,8 @@ const Contas = (() => {
     Store.atualizar(s => {
       const c = s.contas.find(x => x.id === id); if (!c) return;
       c.pagamentos = c.pagamentos || {};
+      if (v && !c.pagamentos[ym]) Amor.somar(s, 4, 'conta');
+      if (!v && c.pagamentos[ym]) Amor.somar(s, -4, 'conta');
       if (v) c.pagamentos[ym] = true; else delete c.pagamentos[ym];
     });
   }

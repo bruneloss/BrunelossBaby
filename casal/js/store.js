@@ -7,6 +7,18 @@ const TAREFAS_PADRAO = [
   ['🛒', 'Ir ao mercado'], ['👔', 'Passar roupa'], ['🪶', 'Tirar o pó'], ['📦', 'Organizar a casa'],
 ];
 
+/* Decoração padrão da casa (bonecos, sofá, TV, rack, música) */
+const CASA_PADRAO = () => ({
+  A: { pele: 'branco', cabelo: 'castanho', penteado: 'curto', acessorio: 'nenhum', roupa: 'amarelo', corAcessorio: 'vermelho' },
+  B: { pele: 'branco', cabelo: 'ruivo', penteado: 'longo', acessorio: 'laco', roupa: 'branco', corAcessorio: 'amarelo' },
+  sofa: { estilo: 'arredondado', cor: 'verde' },
+  tv: { estilo: 'tubo', cor: 'verde' },
+  rack: { estilo: 'redondo', cor: 'preto' },
+  musica: { faixa: null },
+  votos: {},
+  planta: '',
+});
+
 /* Preferências só deste aparelho (quem está usando, config de sincronização) */
 const Local = (() => {
   const KEY = 'casal.local.v1';
@@ -33,12 +45,17 @@ const Store = (() => {
     financas: {},
     contas: [],
     agenda: [],
+    indicacoes: [],
+    amor: { total: 0, dias: {} },
+    casa: CASA_PADRAO(),
   });
   const migrar = e => {
     const p = padrao();
     for (const k in p) if (e[k] === undefined) e[k] = p[k];
     e.casal = { ...p.casal, ...e.casal };
     e.tarefas = { ...p.tarefas, ...e.tarefas };
+    e.casa = { ...p.casa, ...e.casa };
+    e.amor = { ...p.amor, ...e.amor };
     return e;
   };
   let estado;
@@ -171,13 +188,15 @@ const Sync = (() => {
     const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
   });
   const V = '10.12.2';
-  const CHAVES = ['casal', 'diasAtivos', 'mensagens', 'prioridades', 'tarefas', 'mercado', 'sonhos', 'contas', 'agenda'];
+  const CHAVES = ['casal', 'diasAtivos', 'mensagens', 'prioridades', 'tarefas', 'mercado', 'sonhos', 'contas', 'agenda', 'indicacoes', 'amor', 'casa'];
 
   /* Mantém os documentos pequenos: recados de até 6 meses e tarefas de até 4 meses */
   function podar(e) {
     const lm = U.addDias(U.hoje(), -180), lt = U.addDias(U.hoje(), -120);
     e.mensagens = e.mensagens.filter(m => m.data >= lm);
     for (const d in e.tarefas.dias) if (d < lt) delete e.tarefas.dias[d];
+    const la = U.addDias(U.hoje(), -60);
+    if (e.amor && e.amor.dias) for (const d in e.amor.dias) if (d < la) delete e.amor.dias[d];
   }
   /* Cada seção vira um documento (finanças: um por mês), para edições em abas diferentes não se atropelarem */
   function partes(e) {
@@ -254,6 +273,7 @@ const Sync = (() => {
           enviados[k] = v;
           if (v.length > 250000) U.toast('⚠️ A seção "' + k + '" ficou grande demais. Apague itens antigos.', 'erro');
           fila = fila.then(() => adb.doc('estado/' + k).set({ v, t: Date.now() })).catch(err => {
+            if (err.code === 'invalid_argument' && v.length < 250000) { enviados[k] = undefined; Casa.semPermissao(); setStatus('erro', 'Sem permissão para salvar nesta casa.'); return; }
             setStatus('erro', err.code === 'quota_exceeded' ? 'O espaço do banco encheu. Apague fotos ou dados antigos.' : err.message);
           });
         }

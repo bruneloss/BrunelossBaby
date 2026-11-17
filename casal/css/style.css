@@ -474,3 +474,111 @@ body.modo-arraste { cursor: grabbing; user-select: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
 }
+
+/* ========== v3: ícones pixelados, cena interativa, decoração, amor, toca-discos, relaxamento ========== */
+.pix-icone { width: 20px; height: 20px; image-rendering: pixelated; display: block; flex-shrink: 0; }
+.menu .ic { display: grid; place-items: center; background: var(--branco); border-radius: 7px; padding: 2px; box-shadow: inset 0 0 0 1.5px var(--branco); }
+.menu a.ativo .ic { background: var(--branco); box-shadow: 0 0 0 2px var(--preto); }
+#config .pix-icone { background: var(--branco); border-radius: 7px; padding: 2px; }
+.menu a.ativo .pix-icone { filter: drop-shadow(1px 1px 0 rgba(0,0,0,.25)); }
+.logo { display: inline-flex; align-items: center; gap: 8px; }
+.logo .pix-icone { width: 24px; height: 24px; }
+#config .pix-icone { width: 22px; height: 22px; }
+@media (max-width: 860px) { .menu .pix-icone { width: 24px; height: 24px; } }
+.btn.largo { width: 100%; }
+
+.ponto-clique { position: absolute; background: transparent; border: none; cursor: pointer; border-radius: 10px; padding: 0; }
+.ponto-clique:hover, .ponto-clique:focus-visible { outline: 2px dashed rgba(30,30,30,.55); outline-offset: -2px; background: rgba(255,255,255,.12); }
+.nivel-tag { position: absolute; left: 6%; top: 35.5%; width: 15%; text-align: center; font-size: clamp(8px, 1.3cqw, 14px); font-weight: 700; background: var(--branco); border: 2px solid var(--preto); border-radius: 999px; pointer-events: none; }
+.cena-botoes { position: absolute; left: 1.5%; bottom: 3%; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.chip-cena { display: inline-flex; align-items: center; gap: 6px; background: var(--branco); border: 2px solid var(--preto); border-radius: 999px; padding: 4px 10px; font-weight: 700; font-size: clamp(10px, 1.4cqw, 14px); cursor: pointer; box-shadow: var(--sombra-mini); max-width: 30cqw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip-cena .pix-icone { width: 16px; height: 16px; }
+.pisca-suave { animation: pisca 1.4s ease-in-out infinite; }
+.dica-cena { text-align: center; color: var(--cinza); font-size: .85rem; margin: 10px 0 0; }
+.tv-tela.plana { border-radius: 2px; }
+
+.ator { transition: transform .3s linear; }
+.ator.andando .corpo { animation: passinho .26s steps(2) infinite; }
+@keyframes passinho { 50% { transform: translateY(-1.5px); } }
+.ator.pula .corpo { animation: pulinho .3s steps(2) 3; }
+@keyframes pulinho { 50% { transform: translateY(-3px); } }
+.gota-sede { animation: bob 1s steps(2) infinite; }
+.gotas rect { animation: cai .5s steps(3) infinite; }
+@keyframes cai { to { transform: translateY(4px); opacity: .2; } }
+.disco.gira { animation: gira .5s steps(2) infinite; }
+@keyframes gira { 50% { transform: translateX(.6px); } }
+.notinhas text { fill: var(--preto); font-family: sans-serif; animation: sobe-nota 1.6s ease-in-out infinite; }
+.notinhas text + text { animation-delay: .8s; }
+@keyframes sobe-nota { 0% { transform: translateY(3px); opacity: 0; } 30% { opacity: 1; } 100% { transform: translateY(-5px); opacity: 0; } }
+.beijo-sobe { animation: beijo .9s ease-out forwards; }
+@keyframes beijo { from { transform: translateY(6px) scale(.6); transform-origin: 80px 44px; opacity: 0; } 30% { opacity: 1; } to { transform: translateY(-6px); opacity: 0; } }
+.digitando { animation: passinho 1.2s steps(2) infinite; }
+.digitando.dois { animation-delay: .6s; }
+.jogo-pisca { animation: pisca 0.8s steps(2) infinite; }
+
+.faixa-aviso { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 58px); z-index: 40; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; background: var(--amarelo); border-bottom: var(--borda); padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); text-align: center; }
+@media (max-width: 860px) { .faixa-aviso { position: static; } }
+.caixa-alerta { background: var(--amarelo-claro); border: 2px solid var(--preto); border-radius: 12px; padding: 10px 12px; }
+.passos { padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
+
+/* Toca-discos */
+.discos { list-style: none; padding: 0; margin: 10px 0; display: flex; flex-direction: column; gap: 8px; }
+.discos li { display: flex; align-items: center; gap: 8px; border: 2px solid var(--preto); border-radius: 14px; padding: 8px; background: var(--branco); }
+.discos li.atual { background: var(--verde-claro); }
+.capa { width: 42px; height: 42px; border-radius: 50%; border: 2.5px solid var(--preto); display: grid; place-items: center; flex-shrink: 0; background-image: radial-gradient(circle, transparent 30%, rgba(0,0,0,.35) 31%, rgba(0,0,0,.35) 34%, transparent 35%); }
+.capa i { width: 12px; height: 12px; border-radius: 50%; background: var(--branco); border: 2px solid var(--preto); }
+.discos li.atual .capa { animation: rodar 3s linear infinite; }
+@keyframes rodar { to { transform: rotate(360deg); } }
+.disco-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.disco-info small { color: var(--cinza); }
+.btn-icone.votado { background: var(--amarelo); border: 2px solid var(--preto); }
+.volume { display: flex; flex-direction: column; gap: 4px; font-weight: 500; font-size: .9rem; }
+.volume input { accent-color: var(--verde); }
+
+/* Nível de amor */
+.amor-topo { display: flex; gap: 16px; align-items: center; }
+.amor-topo > div { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.amor-topo small { color: var(--cinza); }
+.amor-coracao { width: 96px; height: 86px; image-rendering: pixelated; flex-shrink: 0; }
+.barra.rosa i { background: repeating-linear-gradient(45deg, #FF5C85, #FF5C85 8px, #FF7FA0 8px, #FF7FA0 16px); }
+.lista-amor { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.lista-amor li { display: flex; justify-content: space-between; border-bottom: 1.5px dashed var(--cinza-claro); padding: 4px 0; }
+.amor-semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; }
+.amor-semana div { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.amor-semana .col { width: 100%; height: 70px; border: 2px solid var(--preto); border-radius: 8px; display: flex; align-items: flex-end; overflow: hidden; background: var(--branco); }
+.amor-semana .col i { display: block; width: 100%; background: #FF5C85; }
+
+/* Decorar */
+.abas-deco { display: flex; flex-wrap: wrap; margin-bottom: 14px; }
+.deco-boneco { display: grid; grid-template-columns: 140px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 560px) { .deco-boneco { grid-template-columns: 1fr; } .previa-boneco { justify-self: center; } }
+.previa-boneco { width: 140px; height: 224px; background: var(--verde-claro); border: var(--borda); border-radius: 18px; image-rendering: pixelated; padding: 8px; }
+.deco-campos { display: flex; flex-direction: column; gap: 12px; min-width: 0; margin-bottom: 12px; }
+.grupo-deco h4 { font-size: .9rem; margin-bottom: 6px; }
+.opcoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.amostra { width: 32px; height: 32px; border-radius: 10px; border: 2.5px solid var(--preto); background: var(--c); cursor: pointer; padding: 0; }
+.amostra.ativo { outline: 3px solid var(--verde); outline-offset: 2px; box-shadow: var(--sombra-mini); }
+.opcao-txt { border: 2px solid var(--preto); border-radius: 999px; background: var(--branco); padding: 5px 12px; cursor: pointer; font-weight: 500; }
+.opcao-txt.ativo { background: var(--verde); color: var(--branco); box-shadow: var(--sombra-mini); }
+
+/* Relaxamento */
+.cena.relax { background: #FFF4D6; }
+.ponto-clique.rotulo span { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); background: var(--branco); border: 2px solid var(--preto); border-radius: 999px; padding: 1px 8px; font-size: clamp(9px, 1.4cqw, 14px); font-weight: 700; white-space: nowrap; box-shadow: var(--sombra-mini); }
+.sugestao { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 18px; background: var(--amarelo); border: var(--borda); border-radius: var(--raio); padding: 10px 14px; box-shadow: var(--sombra); }
+.sugestao span { font-weight: 700; }
+.sugestao small { color: #5A4A00; }
+button.card-resumo { font: inherit; text-align: left; cursor: pointer; color: inherit; }
+.filtros-ind { margin: 16px 0 10px; display: flex; flex-wrap: wrap; }
+.lista-ind { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.ind { display: flex; gap: 10px; border: var(--borda); border-radius: 14px; background: var(--branco); padding: 10px; }
+.ind.concluido { background: var(--verde-claro); }
+.lombada { width: 10px; border-radius: 4px; border: 2px solid var(--preto); flex-shrink: 0; }
+.ind-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ind-info h4 small { font-weight: 400; color: var(--cinza); }
+.ind-de, .ind-coment { margin: 0; font-size: .9rem; }
+.ind-coment { font-style: italic; }
+.ind-link { font-size: .85rem; font-weight: 700; color: var(--verde-escuro); }
+.ind-acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.segmentado.mini button { padding: 4px 10px; font-size: .8rem; }
+.estrelas button { border: none; background: none; font-size: 1.2rem; color: var(--cinza-claro); cursor: pointer; padding: 0 1px; -webkit-text-stroke: 1px var(--preto); }
+.estrelas button.on { color: var(--amarelo); }

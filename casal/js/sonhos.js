@@ -90,7 +90,7 @@ Views.sonhos = (() => {
       U.$$('[data-cor]', m.el).forEach(b => b.onclick = () => mudar(x => { x.cor = b.dataset.cor; }, { registrar: false }));
       U.$$('[data-check]', m.el).forEach(c => c.onchange = () => {
         if (c.checked) { const r = c.getBoundingClientRect(); U.coracoes(r.left, r.top, 5); }
-        mudar(x => { x.checklist.find(k => k.id === c.dataset.check).feito = c.checked; });
+        Store.atualizar(st => { st.sonhos.find(x => x.id === id).checklist.find(k => k.id === c.dataset.check).feito = c.checked; Amor.somar(st, c.checked ? 6 : -6, 'sonho'); });
         if (progresso(sonho()) === 100) U.toast('🎉 Sonho realizado! Que orgulho de vocês!', 'festa');
       });
       U.$$('[data-tirar]', m.el).forEach(b => b.onclick = () => mudar(x => { x.checklist = x.checklist.filter(k => k.id !== b.dataset.tirar); }, { registrar: false }));

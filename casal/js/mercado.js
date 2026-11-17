@@ -50,7 +50,7 @@ Views.mercado = (() => {
     };
     U.$$('[data-comprado]', el).forEach(c => c.onchange = () => {
       if (c.checked) { const r = c.getBoundingClientRect(); U.coracoes(r.left, r.top, 4); }
-      Store.atualizar(s => { s.mercado.find(i => i.id === c.dataset.comprado).comprado = c.checked; });
+      Store.atualizar(s => { s.mercado.find(i => i.id === c.dataset.comprado).comprado = c.checked; Amor.somar(s, c.checked ? 1 : -1, 'mercado'); });
     });
     U.$$('[data-mais]', el).forEach(b => b.onclick = () => Store.atualizar(s => {
       const i = s.mercado.find(x => x.id === b.dataset.mais);

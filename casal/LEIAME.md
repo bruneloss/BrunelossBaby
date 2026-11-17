@@ -8,7 +8,7 @@ Ele é feito só com HTML, CSS e JavaScript, sem instalação nem servidor próp
 
 - **Mais fácil — link do claude.ai:** <https://claude.ai/artifact/NwstwGZofEv7yBzqrqxzse>
   Os dados ficam guardados no claude.ai e são compartilhados entre vocês dois automaticamente (sem Firebase).
-  Para a outra pessoa usar, compartilhe pelo botão **Compartilhar** da página, dando permissão para **editar** (ela precisa ter conta no claude.ai).
+  **Para o seu amor entrar na casa e editar junto:** em **Compartilhar**, convide o e-mail da conta claude.ai dele(a) como **Editor** e deixe o **link público desligado**. Pessoas de fora da sua organização só conseguem salvar alterações assim; pelo link público (ou como Leitor/Comentarista) elas só veem. Dentro do site: ⚙️ → **Convidar meu amor para a casa**.
   Para atualizar essa versão, publique `casal/artifact.html` junto com as pastas `css/` e `js/`.
 
 - **No computador:** abra o arquivo `casal/index.html` no navegador.
@@ -28,7 +28,10 @@ Ele é feito só com HTML, CSS e JavaScript, sem instalação nem servidor próp
 | 🌈 **Sonhos** | Cada sonho é uma pasta com fotos, descrição, ideias e checklist com barra de progresso. |
 | 📊 **Finanças** | Segue o modelo da planilha: **Renda** (recebido / utilizado / atual, separando conta e vale alimentação), **Despesas fixas**, **Despesas variáveis**, **Investimentos** (com total acumulado por destino). Tem uma visão por pessoa e a visão **Casal**, com o comparativo e o resumo do ano. "Copiar do mês anterior" repete a renda e as despesas fixas. |
 | 💸 **Contas** | Contas com dia de vencimento, valor (ajustável por mês), forma de pagamento e quem paga (um, outro ou ambos, dividido). **Ligações:** entram automaticamente nas despesas fixas de quem paga, aparecem no alerta 🚨 quando faltam 3 dias ou menos (ou se estão atrasadas) e também aparecem na agenda. |
+| 🛋️ **Relaxamento** | Escritório do casal: estante de livros, computadores (séries), videogame e estante de DVDs. Toque nos móveis para indicar livros, filmes, séries e jogos um para o outro, marcar o andamento e dar estrelas. As estantes enchem conforme as indicações. |
 | 📅 **Agenda** | Visões de mês, semana e lista, no estilo do Google Agenda. Tipos: evento, aniversário (repete todo ano), data importante e rotina (escolha os dias da semana). Cores: verde para a pessoa 1, amarelo para a pessoa 2 e preto para os dois. |
+
+Na sala também dá para: **decorar** (🖌️ Decorar: pele, cabelo, penteado, acessório e roupa de cada boneco; estilo e cor do sofá, da TV e do rack), **tocar o seu boneco** para agir, **tocar no seu amor** para dar um beijinho, **regar a planta** (ela murcha se ninguém regar no dia) e escolher um disco no **toca-discos** (músicas 8-bit originais, com 👍/👎). O **coração no quadro** mostra o nível de amor: enche com recados, tarefas, beijinhos e outras interações do dia, e os pontos somam para subir de nível.
 
 Em ⚙️ **Configurações**: nomes, "juntos desde", quem está usando o aparelho, sincronização e backup.
 
