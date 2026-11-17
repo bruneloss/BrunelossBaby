@@ -126,7 +126,13 @@ const Fotos = (() => {
   async function apagar(id) { cache.delete(id); await tx('readwrite', s => s.delete(id)); Sync.apagarFoto(id); }
 
   /* Reduz a imagem para economizar espaço */
-  function reduzir(file, max = 1100, q = 0.78) {
+  async function reduzir(file) {
+    let d = await reduzirCom(file, 1000, 0.75);
+    if (d.length > 240000) d = await reduzirCom(file, 760, 0.62);
+    if (d.length > 240000) d = await reduzirCom(file, 560, 0.55);
+    return d;
+  }
+  function reduzirCom(file, max, q) {
     return new Promise((res, rej) => {
       const img = new Image();
       const url = URL.createObjectURL(file);
@@ -152,9 +158,12 @@ const Fotos = (() => {
   return { salvar, obter, apagar, reduzir, hidratar };
 })();
 
-/* Sincronização opcional via Firebase Firestore (para usar em dois celulares) */
+/* Sincronização: no claude.ai usa o banco compartilhado do Artifact; fora dele, Firebase (opcional) */
 const Sync = (() => {
   let ref = null, timer = null, status = 'off', detalhe = '';
+  let modo = 'local', adb = null, carregado = false, fila = Promise.resolve();
+  let prontoRes; const pronto = new Promise(r => (prontoRes = r));
+  const enviados = {};
   const ouvintes = new Set();
   const setStatus = (s, d = '') => { status = s; detalhe = d; ouvintes.forEach(f => f(s, d)); };
   const carregar = src => new Promise((res, rej) => {
@@ -162,11 +171,53 @@ const Sync = (() => {
     const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s);
   });
   const V = '10.12.2';
+  const CHAVES = ['casal', 'diasAtivos', 'mensagens', 'prioridades', 'tarefas', 'mercado', 'sonhos', 'contas', 'agenda'];
 
-  async function iniciar() {
+  /* Mantém os documentos pequenos: recados de até 6 meses e tarefas de até 4 meses */
+  function podar(e) {
+    const lm = U.addDias(U.hoje(), -180), lt = U.addDias(U.hoje(), -120);
+    e.mensagens = e.mensagens.filter(m => m.data >= lm);
+    for (const d in e.tarefas.dias) if (d < lt) delete e.tarefas.dias[d];
+  }
+  /* Cada seção vira um documento (finanças: um por mês), para edições em abas diferentes não se atropelarem */
+  function partes(e) {
+    podar(e);
+    const p = {};
+    CHAVES.forEach(k => { p[k] = JSON.stringify(e[k]); });
+    Object.keys(e.financas).forEach(ym => { p['fin-' + ym] = JSON.stringify(e.financas[ym]); });
+    return p;
+  }
+
+  async function iniciarArtifact() {
+    if (!window.claude || typeof window.claude.use !== 'function') return false;
+    let db = null;
+    try { db = await window.claude.use('db'); } catch (e) { db = null; }
+    if (!db) return false;
+    modo = 'artifact'; adb = db; setStatus('conectando');
+    const t = setTimeout(() => { setStatus('erro', 'Os dados compartilhados ainda não responderam. Continuo tentando.'); prontoRes(); }, 10000);
+    db.collection('estado').onSnapshot(snap => {
+      const e = U.clone(Store.get());
+      let mudou = false;
+      snap.docs.forEach(d => {
+        const v = (d.data() || {}).v;
+        if (typeof v !== 'string' || enviados[d.id] === v) return;
+        enviados[d.id] = v; mudou = true;
+        try { const val = JSON.parse(v); if (d.id.startsWith('fin-')) e.financas[d.id.slice(4)] = val; else e[d.id] = val; } catch (x) {}
+      });
+      if (mudou) Store.substituir(e, { silencioso: true });
+      if (!snap.metadata.fromCache) {
+        clearTimeout(t);
+        setStatus('on');
+        if (!carregado) { carregado = true; enviar(true); prontoRes(); }
+      }
+    }, err => { clearTimeout(t); setStatus('erro', err.message); prontoRes(); });
+    return true;
+  }
+
+  async function iniciarFirebase() {
     const { firebase: cfg, codigo } = Local.get();
     if (!cfg || !codigo) { setStatus('off'); return; }
-    setStatus('conectando');
+    modo = 'firebase'; setStatus('conectando');
     try {
       await carregar(`https://www.gstatic.com/firebasejs/${V}/firebase-app-compat.js`);
       await carregar(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore-compat.js`);
@@ -186,9 +237,31 @@ const Sync = (() => {
     } catch (e) { setStatus('erro', e.message || String(e)); }
   }
 
+  /* Resolve quando os dados compartilhados chegaram (ou desistiu de esperar) */
+  async function iniciar() {
+    if (await iniciarArtifact()) return pronto;
+    await iniciarFirebase();
+  }
+
   function enviar(agora = false) {
-    if (!ref) return;
     clearTimeout(timer);
+    if (modo === 'artifact') {
+      if (!carregado) return; // nunca sobrescreve o banco antes de ler o que já existe
+      const fazer = () => {
+        const p = partes(Store.get());
+        for (const [k, v] of Object.entries(p)) {
+          if (enviados[k] === v) continue;
+          enviados[k] = v;
+          if (v.length > 250000) U.toast('⚠️ A seção "' + k + '" ficou grande demais. Apague itens antigos.', 'erro');
+          fila = fila.then(() => adb.doc('estado/' + k).set({ v, t: Date.now() })).catch(err => {
+            setStatus('erro', err.code === 'quota_exceeded' ? 'O espaço do banco encheu. Apague fotos ou dados antigos.' : err.message);
+          });
+        }
+      };
+      agora === true ? fazer() : (timer = setTimeout(fazer, 500));
+      return;
+    }
+    if (!ref) return;
     const fazer = () => {
       const e = Store.get();
       ref.set({ estado: JSON.stringify(e), atualizado: e._atualizado || Date.now(), por: Local.get().deviceId })
@@ -196,11 +269,16 @@ const Sync = (() => {
     };
     agora === true ? fazer() : (timer = setTimeout(fazer, 600));
   }
-  const enviarFoto = (id, data) => ref && ref.collection('fotos').doc(id).set({ data }).catch(err => setStatus('erro', err.message));
-  const apagarFoto = id => ref && ref.collection('fotos').doc(id).delete().catch(() => {});
+
+  const docFoto = id => modo === 'artifact' ? adb.doc('fotos/' + id) : ref ? ref.collection('fotos').doc(id) : null;
+  function enviarFoto(id, data) { const d = docFoto(id); return d ? d.set({ data }).catch(err => setStatus('erro', err.message)) : null; }
+  function apagarFoto(id) { const d = docFoto(id); return d ? d.delete().catch(() => {}) : null; }
   async function baixarFoto(id) {
-    if (!ref) return null;
-    try { const s = await ref.collection('fotos').doc(id).get(); return s.exists ? s.data().data : null; } catch (e) { return null; }
+    const d = docFoto(id); if (!d) return null;
+    try { const s = await d.get(); return s.exists ? s.data().data : null; } catch (e) { return null; }
   }
-  return { iniciar, enviar, enviarFoto, apagarFoto, baixarFoto, status: () => [status, detalhe], ouvir: f => ouvintes.add(f) };
+  return {
+    iniciar, enviar, enviarFoto, apagarFoto, baixarFoto,
+    status: () => [status, detalhe], ouvir: f => ouvintes.add(f), modo: () => modo,
+  };
 })();

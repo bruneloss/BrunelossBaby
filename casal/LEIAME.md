@@ -6,6 +6,11 @@ Ele é feito só com HTML, CSS e JavaScript, sem instalação nem servidor próp
 
 ## Como abrir
 
+- **Mais fácil — link do claude.ai:** <https://claude.ai/artifact/NwstwGZofEv7yBzqrqxzse>
+  Os dados ficam guardados no claude.ai e são compartilhados entre vocês dois automaticamente (sem Firebase).
+  Para a outra pessoa usar, compartilhe pelo botão **Compartilhar** da página, dando permissão para **editar** (ela precisa ter conta no claude.ai).
+  Para atualizar essa versão, publique `casal/artifact.html` junto com as pastas `css/` e `js/`.
+
 - **No computador:** abra o arquivo `casal/index.html` no navegador.
 - **No celular (recomendado):** publique pelo GitHub Pages:
   1. No GitHub, abra o repositório e vá em **Settings → Pages**.

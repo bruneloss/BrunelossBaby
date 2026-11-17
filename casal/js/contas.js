@@ -93,9 +93,9 @@ Views.contas = (() => {
     U.$$('[data-mes]', el).forEach(b => b.onclick = () => { const n = +b.dataset.mes; mes = n ? U.addMes(mes, n) : U.mesAtual(); App.render(); });
     U.$('#novaConta', el).onclick = () => editar();
     U.$$('[data-editar]', el).forEach(b => b.onclick = () => editar(Store.get().contas.find(c => c.id === b.dataset.editar)));
-    U.$$('[data-apagar]', el).forEach(b => b.onclick = () => {
+    U.$$('[data-apagar]', el).forEach(b => b.onclick = async () => {
       const c = Store.get().contas.find(x => x.id === b.dataset.apagar);
-      if (U.confirmar(`Apagar a conta "${c.nome}" de todos os meses?`)) Store.atualizar(s => { s.contas = s.contas.filter(x => x.id !== c.id); }, { registrar: false });
+      if (await U.confirmar(`Apagar a conta "${c.nome}" de todos os meses?`)) Store.atualizar(s => { s.contas = s.contas.filter(x => x.id !== c.id); }, { registrar: false });
     });
     U.$$('[data-pago]', el).forEach(i => i.onchange = () => {
       Contas.marcarPago(i.dataset.pago, mes, i.checked);

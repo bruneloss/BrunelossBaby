@@ -247,8 +247,8 @@ Views.agenda = (() => {
       m.fechar();
     };
     const ap = U.$('#apagarEv', m.el);
-    if (ap) ap.onclick = () => {
-      if (!U.confirmar('Apagar este item da agenda (todas as repetições)?')) return;
+    if (ap) ap.onclick = async () => {
+      if (!(await U.confirmar('Apagar este item da agenda (todas as repetições)?'))) return;
       Store.atualizar(s => { s.agenda = s.agenda.filter(x => x.id !== ev.id); }, { registrar: false });
       m.fechar();
     };

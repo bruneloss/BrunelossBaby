@@ -29,8 +29,8 @@ Views.sonhos = (() => {
       </div>
     </section>`;
     Fotos.hidratar(el);
-    const criar = () => {
-      const titulo = prompt('Qual é o sonho? (ex.: Viagem para o Japão)');
+    const criar = async () => {
+      const titulo = await U.pedirTexto('🌈 Novo sonho', 'Qual é o sonho?', 'Ex.: Viagem para o Japão');
       if (!titulo || !titulo.trim()) return;
       const id = U.uid();
       Store.atualizar(s => s.sonhos.push({ id, titulo: titulo.trim(), emoji: '✨', cor: CORES[s.sonhos.length % CORES.length], descricao: '', ideias: '', fotos: [], checklist: [], criado: Date.now() }));
@@ -110,16 +110,16 @@ Views.sonhos = (() => {
         }
         if (ids.length) mudar(x => x.fotos.push(...ids));
       };
-      U.$$('[data-tirar-foto]', m.el).forEach(b => b.onclick = () => {
-        if (!U.confirmar('Remover esta foto?')) return;
+      U.$$('[data-tirar-foto]', m.el).forEach(b => b.onclick = async () => {
+        if (!(await U.confirmar('Remover esta foto?'))) return;
         Fotos.apagar(b.dataset.tirarFoto);
         mudar(x => { x.fotos = x.fotos.filter(f => f !== b.dataset.tirarFoto); }, { registrar: false });
       });
       U.$$('[data-ver]', m.el).forEach(img => img.onclick = () => {
         U.modal({ titulo: '📷', largo: true, corpo: `<img class="foto-grande" data-foto="${img.dataset.ver}" alt="">`, aoAbrir: v => Fotos.hidratar(v.el) });
       });
-      U.$('#apagarSonho', m.el).onclick = () => {
-        if (!U.confirmar(`Apagar o sonho "${s.titulo}" com todas as fotos?`)) return;
+      U.$('#apagarSonho', m.el).onclick = async () => {
+        if (!(await U.confirmar(`Apagar o sonho "${s.titulo}" com todas as fotos?`))) return;
         s.fotos.forEach(f => Fotos.apagar(f));
         Store.atualizar(st => { st.sonhos = st.sonhos.filter(x => x.id !== id); }, { registrar: false });
       };

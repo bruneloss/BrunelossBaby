@@ -17,7 +17,7 @@ const App = (() => {
     U.$('#quemSou').title = eu ? `Usando como ${Store.nome(eu)}` : 'Escolher quem está usando';
     const [st] = Sync.status();
     U.$('#statusSync').className = 'status-sync ' + st;
-    U.$('#statusSync').title = { off: 'Só neste aparelho', conectando: 'Conectando…', on: 'Sincronizado', erro: 'Erro na sincronização' }[st];
+    U.$('#statusSync').title = { off: Sync.modo() === 'artifact' ? 'Offline' : 'Só neste aparelho', conectando: 'Conectando…', on: 'Sincronizado', erro: 'Erro na sincronização' }[st];
   }
 
   /* Renderiza a tela atual preservando o campo com foco (útil em tabelas editáveis) */
@@ -56,6 +56,11 @@ const App = (() => {
         <div class="segmentado grande">
           ${['A', 'B'].map(p => `<button class="${L.eu === p ? 'ativo ' + p.toLowerCase() : ''}" data-eu="${p}">${U.esc(Store.nome(p))}</button>`).join('')}
         </div>
+        ${Sync.modo() === 'artifact' ? `
+        <h3 class="sub">🔄 Dados compartilhados</h3>
+        <p class="dica">Os dados ficam guardados no claude.ai e aparecem para vocês dois. Para o seu amor usar, compartilhe este link pelo botão <b>Compartilhar</b> do claude.ai, com permissão para editar.</p>
+        <p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'offline', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'sem conexão' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>
+        ` : `
         <h3 class="sub">🔄 Usar nos dois celulares (sincronização)</h3>
         <p class="dica">Sem sincronização, os dados ficam só neste navegador. Para ver tudo nos dois aparelhos, crie um projeto gratuito no Firebase (veja o passo a passo no arquivo <b>LEIAME.md</b>) e cole aqui a configuração. Use o <b>mesmo código do casal</b> nos dois aparelhos.</p>
         <p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'só neste aparelho', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'erro' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>
@@ -63,7 +68,7 @@ const App = (() => {
           <label class="larga">Código do casal (combinem um código difícil de adivinhar)<input name="codigo" value="${U.esc(L.codigo || '')}" placeholder="ex.: nos-dois-${Math.random().toString(36).slice(2, 8)}" pattern="[A-Za-z0-9_\\-]{6,}" title="Pelo menos 6 letras, números, - ou _"></label>
           <label class="larga">Configuração do Firebase (firebaseConfig)<textarea name="cfg" rows="5" placeholder='{ apiKey: "...", authDomain: "...", projectId: "...", ... }'>${L.firebase ? U.esc(JSON.stringify(L.firebase, null, 1)) : ''}</textarea></label>
           <div class="botoes larga">${L.firebase ? '<button type="button" class="btn" id="desligarSync">Desligar</button>' : ''}<button class="btn primario">Conectar</button></div>
-        </form>
+        </form>`}
         <h3 class="sub">💾 Backup</h3>
         <div class="botoes">
           <button class="btn" id="exportar">⬇️ Baixar backup</button>
@@ -77,7 +82,8 @@ const App = (() => {
         U.toast('Nomes salvos 💚'); desenhar(m);
       };
       U.$$('[data-eu]', m.el).forEach(b => b.onclick = () => { Local.set('eu', b.dataset.eu); nav(); desenhar(m); agendar(); });
-      U.$('#fSync', m.el).onsubmit = ev => {
+      const fs = U.$('#fSync', m.el);
+      if (fs) fs.onsubmit = ev => {
         ev.preventDefault(); const f = ev.target;
         const cfg = lerConfig(f.cfg.value);
         if (!cfg || !cfg.apiKey || !cfg.projectId) return U.toast('Não reconheci a configuração. Cole o bloco firebaseConfig inteiro.', 'erro');
@@ -90,8 +96,8 @@ const App = (() => {
       if (des) des.onclick = () => { Local.set('firebase', null); location.reload(); };
       U.$('#exportar', m.el).onclick = exportar;
       U.$('#importar', m.el).onchange = ev => importar(ev.target.files[0]);
-      U.$('#apagarTudo', m.el).onclick = () => {
-        if (U.confirmar('Apagar TODOS os dados do casal? Isso não pode ser desfeito (faça um backup antes).')) { Store.resetar(); m.fechar(); U.toast('Tudo zerado.'); }
+      U.$('#apagarTudo', m.el).onclick = async () => {
+        if (await U.confirmar('Apagar TODOS os dados do casal? Isso não pode ser desfeito (faça um backup antes).')) { Store.resetar(); m.fechar(); U.toast('Tudo zerado.'); }
       };
     };
     U.modal({ titulo: '⚙️ Configurações', aoAbrir: desenhar });
@@ -117,7 +123,7 @@ const App = (() => {
     try {
       const dados = JSON.parse(await file.text());
       if (!dados.estado) throw new Error('arquivo inválido');
-      if (!U.confirmar('Substituir os dados atuais pelos do backup?')) return;
+      if (!(await U.confirmar('Substituir os dados atuais pelos do backup?', { ok: 'Substituir' }))) return;
       for (const [id, v] of Object.entries(dados.fotos || {})) await Fotos.salvar(id, v);
       dados.estado._atualizado = Date.now();
       Store.substituir(dados.estado);
@@ -144,7 +150,7 @@ const App = (() => {
     };
   }
 
-  function iniciar() {
+  async function iniciar() {
     U.$('#config').onclick = config;
     U.$('#quemSou').onclick = config;
     U.$('#statusSync').onclick = config;
@@ -152,8 +158,11 @@ const App = (() => {
     Store.assinar(agendar);
     Sync.ouvir(() => nav());
     render();
-    Sync.iniciar();
-    if (!Local.get().eu && !Store.get().diasAtivos.length) boasVindas();
+    // espera os dados compartilhados antes de decidir entre boas-vindas e "quem é você?"
+    await Sync.iniciar();
+    const e = Store.get();
+    const semNomes = e.casal.A === 'Amor 1' && e.casal.B === 'Amor 2';
+    if (!Local.get().eu && semNomes && !e.diasAtivos.length) boasVindas();
     else if (!Local.get().eu) config();
     // vira o dia com o app aberto: redesenha (ofensiva/agenda)
     let dia = U.hoje();
@@ -163,4 +172,4 @@ const App = (() => {
   return { render, iniciar };
 })();
 
-document.addEventListener('DOMContentLoaded', App.iniciar);
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', App.iniciar); else App.iniciar();

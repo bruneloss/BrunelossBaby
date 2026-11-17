@@ -61,7 +61,7 @@ const U = {
       <div class="modal-corpo"></div></div>`;
     const corpoEl = U.$('.modal-corpo', fundo);
     const fechar = () => { fundo.remove(); document.removeEventListener('keydown', esc); aoFechar && aoFechar(); };
-    const esc = e => { if (e.key === 'Escape') fechar(); };
+    const esc = e => { if (e.key === 'Escape' && fundo === U.$('#modais').lastElementChild) fechar(); };
     const render = html => { corpoEl.innerHTML = typeof html === 'function' ? html() : html; };
     render(corpo);
     fundo.addEventListener('pointerdown', e => { if (e.target === fundo) fundo.dataset.fora = '1'; });
@@ -75,7 +75,31 @@ const U = {
     return api;
   },
 
-  confirmar(msg) { return window.confirm(msg); },
+  /* Confirmação dentro da página (o claude.ai bloqueia confirm/prompt do navegador) */
+  confirmar(msg, { ok = 'Sim, apagar', perigo = true } = {}) {
+    return new Promise(res => {
+      let resposta = false;
+      const m = U.modal({
+        titulo: 'Tem certeza?',
+        corpo: `<p>${U.esc(msg)}</p><div class="botoes direita"><button class="btn" data-r="0">Cancelar</button><button class="btn ${perigo ? 'perigo' : 'primario'}" data-r="1" autofocus>${U.esc(ok)}</button></div>`,
+        aoFechar: () => res(resposta),
+      });
+      U.$$('[data-r]', m.el).forEach(b => b.onclick = () => { resposta = b.dataset.r === '1'; m.fechar(); });
+    });
+  },
+  /* Pergunta um texto (substitui o prompt do navegador) */
+  pedirTexto(titulo, rotulo, placeholder = '') {
+    return new Promise(res => {
+      let resposta = null;
+      const m = U.modal({
+        titulo,
+        corpo: `<form class="form-grade"><label class="larga">${U.esc(rotulo)}<input name="t" required maxlength="80" placeholder="${U.esc(placeholder)}" autofocus></label>
+          <div class="larga botoes direita"><button class="btn primario">Criar</button></div></form>`,
+        aoFechar: () => res(resposta),
+      });
+      U.$('form', m.el).onsubmit = ev => { ev.preventDefault(); resposta = ev.target.t.value.trim() || null; m.fechar(); };
+    });
+  },
 
   /* Arrastar e soltar com ponteiro (funciona no celular e no PC) */
   arrastavel(raiz, { item, alvo, aoSoltar, aoTocar }) {
@@ -121,7 +145,17 @@ const U = {
     });
   },
 
-  baixar(nome, texto, tipo = 'application/json') {
+  /* Salvar arquivo: no claude.ai usa a capacidade "downloads"; fora dele, um link comum */
+  async baixar(nome, texto, tipo = 'application/json') {
+    if (window.claude && typeof window.claude.use === 'function') {
+      let d = null;
+      try { d = await window.claude.use('downloads'); } catch (e) {}
+      if (d) {
+        try { const r = await d.save({ filename: nome, data: texto }); if (r && r.status === 'saved') U.toast('Backup salvo 💾'); }
+        catch (e) { if (e && e.code === 'unavailable') U.toast('Não dá para salvar arquivos aqui.', 'erro'); }
+        return;
+      }
+    }
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([texto], { type: tipo }));
     a.download = nome; a.click();
