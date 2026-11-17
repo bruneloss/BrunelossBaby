@@ -477,9 +477,7 @@ body.modo-arraste { cursor: grabbing; user-select: none; }
 
 /* ========== v3: ícones pixelados, cena interativa, decoração, amor, toca-discos, relaxamento ========== */
 .pix-icone { width: 20px; height: 20px; image-rendering: pixelated; display: block; flex-shrink: 0; }
-.menu .ic { display: grid; place-items: center; background: var(--branco); border-radius: 7px; padding: 2px; box-shadow: inset 0 0 0 1.5px var(--branco); }
-.menu a.ativo .ic { background: var(--branco); box-shadow: 0 0 0 2px var(--preto); }
-#config .pix-icone { background: var(--branco); border-radius: 7px; padding: 2px; }
+
 .menu a.ativo .pix-icone { filter: drop-shadow(1px 1px 0 rgba(0,0,0,.25)); }
 .logo { display: inline-flex; align-items: center; gap: 8px; }
 .logo .pix-icone { width: 24px; height: 24px; }
@@ -489,7 +487,7 @@ body.modo-arraste { cursor: grabbing; user-select: none; }
 
 .ponto-clique { position: absolute; background: transparent; border: none; cursor: pointer; border-radius: 10px; padding: 0; }
 .ponto-clique:hover, .ponto-clique:focus-visible { outline: 2px dashed rgba(30,30,30,.55); outline-offset: -2px; background: rgba(255,255,255,.12); }
-.nivel-tag { position: absolute; left: 6%; top: 35.5%; width: 15%; text-align: center; font-size: clamp(8px, 1.3cqw, 14px); font-weight: 700; background: var(--branco); border: 2px solid var(--preto); border-radius: 999px; pointer-events: none; }
+.nivel-tag { position: absolute; left: 4.5%; top: 31%; width: 14.5%; text-align: center; font-size: clamp(8px, 1.3cqw, 14px); font-weight: 700; background: var(--branco); border: 2px solid var(--preto); border-radius: 999px; pointer-events: none; }
 .cena-botoes { position: absolute; left: 1.5%; bottom: 3%; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 .chip-cena { display: inline-flex; align-items: center; gap: 6px; background: var(--branco); border: 2px solid var(--preto); border-radius: 999px; padding: 4px 10px; font-weight: 700; font-size: clamp(10px, 1.4cqw, 14px); cursor: pointer; box-shadow: var(--sombra-mini); max-width: 30cqw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip-cena .pix-icone { width: 16px; height: 16px; }
@@ -582,3 +580,17 @@ button.card-resumo { font: inherit; text-align: left; cursor: pointer; color: in
 .segmentado.mini button { padding: 4px 10px; font-size: .8rem; }
 .estrelas button { border: none; background: none; font-size: 1.2rem; color: var(--cinza-claro); cursor: pointer; padding: 0 1px; -webkit-text-stroke: 1px var(--preto); }
 .estrelas button.on { color: var(--amarelo); }
+
+/* v4: camada de quem está em pé, regador, prévia da decoração */
+.cena-topo { pointer-events: none; }
+.regador { animation: inclina 0.9s steps(2) infinite; transform-box: fill-box; transform-origin: 80% 60%; }
+@keyframes inclina { 50% { transform: rotate(-18deg); } }
+.agua .pingo { animation: pinga .6s linear infinite; }
+.agua .p1 { animation-delay: .15s; } .agua .p2 { animation-delay: .3s; } .agua .p3 { animation-delay: .45s; }
+@keyframes pinga { from { transform: translateY(0); opacity: 1; } to { transform: translateY(7px); opacity: 0; } }
+.deco-previa { position: sticky; top: -16px; z-index: 2; background: var(--branco); padding: 0 0 10px; margin-bottom: 4px; }
+.deco-previa .mini-cena { position: relative; width: 100%; max-width: 520px; margin: 0 auto; aspect-ratio: 16 / 10; border: 2.5px solid var(--preto); border-radius: 14px; overflow: hidden; box-shadow: var(--sombra-mini); }
+.deco-previa .mini-cena svg { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+@media (max-width: 560px) { .deco-previa .mini-cena { max-width: 100%; } .previa-boneco { display: none; } .deco-boneco { grid-template-columns: 1fr; } }
+.ambientes { display: flex; margin-bottom: 8px; }
+.amostra.sem { background: repeating-linear-gradient(45deg, #fff 0 4px, #ddd 4px 8px); }

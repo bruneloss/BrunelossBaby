@@ -42,7 +42,7 @@ const Amor = (() => {
       titulo: '💗 Nível de amor',
       corpo: `
         <div class="amor-topo">
-          <svg class="amor-coracao" viewBox="0 0 9 8" shape-rendering="crispEdges">${coracaoSVG(m)}</svg>
+          <svg class="amor-coracao" viewBox="0 0 13 11" shape-rendering="crispEdges">${coracaoSVG(m)}</svg>
           <div><small>Nível ${nv.n}</small><h3>${nv.nome}</h3>
             <div class="barra rosa"><i style="width:${nv.prog}%"></i></div>
             <small>${nv.total} pontos de amor · faltam ${nv.falta} para o próximo nível</small></div>
@@ -56,11 +56,12 @@ const Amor = (() => {
     });
   }
 
-  /* Coração 9x8 que enche de baixo para cima */
+  /* Coração 13x11 que enche de baixo para cima */
   function coracaoSVG(pct) {
-    const L = ['.OO...OO.', 'OXXO.OXXO', 'OXXXOXXXO', 'OXXXXXXXO', '.OXXXXXO.', '..OXXXO..', '...OXO...', '....O....'];
-    const cheias = Math.round(pct / 100 * 6); // linhas internas 1..6
-    const linhas = L.map((l, y) => l.replace(/X/g, y >= 7 - cheias ? 'P' : 'V'));
+    const L = ['..OOO...OOO..', '.OXXXO.OXXXO.', 'OXXXXXOXXXXXO', 'OXXXXXXXXXXXO', 'OXXXXXXXXXXXO', '.OXXXXXXXXXO.',
+      '..OXXXXXXXO..', '...OXXXXXO...', '....OXXXO....', '.....OXO.....', '......O......'];
+    const cheias = Math.round(pct / 100 * 9); // linhas internas 1..9
+    const linhas = L.map((l, y) => l.replace(/X/g, y >= 10 - cheias ? 'P' : 'V'));
     return Pixel.grade(linhas, { O: '#1E1E1E', P: '#FF5C85', V: '#FFE1E9' });
   }
 

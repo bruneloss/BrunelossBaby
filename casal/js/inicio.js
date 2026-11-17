@@ -55,15 +55,16 @@ Views.inicio = (() => {
         ${cena.svg}
         <button class="ponto-clique" id="hsPlanta" style="left:1%;top:34%;width:14%;height:35%" aria-label="Regar a planta"></button>
         <button class="ponto-clique" id="hsDisco" style="left:77.5%;top:45%;width:12.5%;height:24%" aria-label="Toca-discos"></button>
-        <button class="ponto-clique" id="hsAmor" style="left:6%;top:11%;width:15%;height:24%" aria-label="Nível de amor"></button>
+        <button class="ponto-clique" id="hsAmor" style="left:5%;top:9%;width:13.5%;height:22%" aria-label="Nível de amor"></button>
         <button class="ponto-clique" id="hsA" style="left:36.25%;top:50%;width:10%;height:16%" aria-label="${U.esc(e.casal.A)}"></button>
         <button class="ponto-clique" id="hsB" style="left:53.75%;top:50%;width:10%;height:16%" aria-label="${U.esc(e.casal.B)}"></button>
         <span class="nivel-tag">Nv ${nv.n} · ${med}%</span>
         <button class="tv-tela ${Cena.casa().tv.estilo}" id="tvTela" aria-label="Recadinhos do dia na TV" style="left:${t.x / 1.6}%;top:${t.y}%;width:${t.w / 1.6}%;height:${t.h}%">
           <span class="tv-msg"></span><span class="tv-autor"></span>
         </button>
+        ${cena.topo}
         <button class="ofensiva ${ativoHoje ? '' : 'apagada'}" id="ofensiva" aria-label="Dias seguidos usando o app">
-          <span class="fogo">🔥</span><b>${n}</b><small>${n === 1 ? 'dia' : 'dias'}</small>
+          <span class="fogo">❤️‍🔥</span><b>${n}</b><small>${n === 1 ? 'dia' : 'dias'}</small>
         </button>
         <button class="alerta ${alertas ? 'piscando' : 'calmo'}" id="alerta" aria-label="Prioridades do dia">
           <svg viewBox="0 0 16 15" shape-rendering="crispEdges"><path d="M7 0h2v1h1v2h1v2h1v2h1v2h1v2h1v3H0v-3h1V9h1V7h1V5h1V3h1V1h1z" fill="#1E1E1E"/><path d="M7 2h2v2h1v2h1v2h1v2h1v2h1v1H2v-1h1v-2h1V8h1V6h1V4h1z" fill="${alertas ? '#FF3B3B' : '#9BD9B0'}"/><rect x="7" y="5" width="2" height="4" fill="#fff"/><rect x="7" y="10" width="2" height="2" fill="#fff"/></svg>
@@ -335,9 +336,9 @@ Views.inicio = (() => {
     let recorde = 0, atual = 0;
     [...set].sort().forEach((d, i, arr) => { atual = i && U.difDias(arr[i - 1], d) === 1 ? atual + 1 : 1; recorde = Math.max(recorde, atual); });
     U.modal({
-      titulo: '🔥 Ofensiva do casal',
+      titulo: '❤️‍🔥 Ofensiva do casal',
       corpo: `
-        <div class="ofensiva-grande ${set.has(h) ? '' : 'apagada'}"><span>🔥</span><b>${n}</b><p>${n === 1 ? 'dia seguido' : 'dias seguidos'}</p></div>
+        <div class="ofensiva-grande ${set.has(h) ? '' : 'apagada'}"><span>❤️‍🔥</span><b>${n}</b><p>${n === 1 ? 'dia seguido' : 'dias seguidos'}</p></div>
         <p class="centro">${set.has(h) ? 'Vocês já registraram algo hoje. Mandaram bem! 💚' : 'Registrem qualquer coisa hoje (um recado, uma tarefa, um item…) para manter a ofensiva!'}</p>
         <div class="cal-ofensiva">
           ${SEMANA_LETRA.map(l => `<span class="cab">${l}</span>`).join('')}

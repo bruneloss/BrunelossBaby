@@ -18,13 +18,18 @@ Views.relax = (() => {
 
   function cenaSVG() {
     const r = [], R = (x, y, w, h, c) => r.push(Pixel.rect(x, y, w, h, c)), O = '#1E1E1E';
-    const c = Cena.casa();
-    // parede creme com rodameio verde, piso de madeira e tapete
-    R(0, 0, 160, 70, '#FFF4D6');
-    R(0, 48, 160, 20, '#CFEBD8'); for (let x = 2; x < 160; x += 6) R(x, 49, 1, 19, '#B9E0C6');
+    const c = Cena.casa(), d = { ...CASA_PADRAO().relax, ...(c.relax || {}) };
+    // parede, rodameio, piso e tapete com as cores escolhidas
+    const pr = Pixel.parede(d.parede), piso = Pixel.PISOS[d.piso] || Pixel.PISOS.claro;
+    R(0, 0, 160, 70, pr);
+    const rm = Pixel.escurecer(pr, 0.1);
+    R(0, 48, 160, 20, rm); for (let x = 2; x < 160; x += 6) R(x, 49, 1, 19, Pixel.escurecer(rm, 0.06));
     R(0, 47, 160, 1, O); R(0, 68, 160, 1, O);
-    R(0, 69, 160, 31, '#E9C77A'); for (let y = 75; y < 100; y += 6) R(0, y, 160, 1, '#D9B25E');
-    Pixel.caixa(r, 30, 82, 76, 14, O, '#3DB56A', 3); R(34, 85, 68, 1, '#5FD08A'); R(34, 92, 68, 1, '#2E9E5B');
+    R(0, 69, 160, 31, piso[1]); for (let y = 75; y < 100; y += 6) R(0, y, 160, 1, piso[2]);
+    if (d.tapete !== 'nenhum') {
+      const tc = Pixel.cor(d.tapete);
+      Pixel.caixa(r, 30, 82, 76, 14, O, tc, 3); R(34, 85, 68, 1, Pixel.clarear(tc, 0.25)); R(34, 92, 68, 1, Pixel.escurecer(tc, 0.2));
+    }
     // janela com céu
     Pixel.caixa(r, 52, 6, 34, 24, O, '#BFE6FF', 1);
     R(56, 12, 8, 3, '#FFFFFF'); R(58, 10, 5, 2, '#FFFFFF'); R(72, 18, 9, 3, '#FFFFFF'); R(74, 16, 4, 2, '#FFFFFF');
@@ -74,8 +79,6 @@ Views.relax = (() => {
       const prat = Math.floor(i / 9), pos = i % 9;
       R(138 + pos * 2, 16 + prat * 11, 1, 8, Indicacoes.corDe(f.titulo));
     });
-    // pufe
-    Pixel.caixa(r, 112, 84, 22, 12, O, '#FFD23F', 4); R(116, 86, 14, 1, '#FFE680');
     return `<svg class="cena-svg" viewBox="0 0 160 100" shape-rendering="crispEdges" aria-hidden="true">${r.join('')}</svg>`;
   }
 
@@ -94,6 +97,7 @@ Views.relax = (() => {
         <button class="ponto-clique rotulo" style="left:26%;top:32%;width:38%;height:26%" data-tipo="serie"><span>💻 Séries</span></button>
         <button class="ponto-clique rotulo" style="left:65%;top:39%;width:19%;height:30%" data-tipo="jogo"><span>🎮 Jogos</span></button>
         <button class="ponto-clique rotulo" style="left:84.5%;top:13%;width:14.5%;height:58%" data-tipo="filme"><span>🎬 Filmes</span></button>
+        <div class="cena-botoes"><button class="chip-cena" id="decorarRelax">${Pixel.icone('pincel')} Decorar</button></div>
       </div>
       ${sugestao ? `<div class="sugestao"><span>✨ Sugestão para hoje</span><b>${Indicacoes.TIPOS[sugestao.tipo].icone} ${U.esc(sugestao.titulo)}</b><small>indicado por ${U.esc(Store.nome(sugestao.por))}</small><button class="btn mini" data-tipo="${sugestao.tipo}">Ver</button></div>` : ''}
       <div class="cards-resumo">
@@ -106,6 +110,7 @@ Views.relax = (() => {
       </div>
     </section>`;
     U.$$('[data-tipo]', el).forEach(b => b.onclick = () => abrir(b.dataset.tipo));
+    U.$('#decorarRelax', el).onclick = () => Decorar.abrir('rparede', 'relax');
   }
 
   function abrir(tipo) {
@@ -181,5 +186,5 @@ Views.relax = (() => {
     desenhar();
   }
 
-  return { render };
+  return { render, cenaSVG };
 })();

@@ -2,8 +2,8 @@
 
 const App = (() => {
   const ROTAS = [
-    ['inicio', 'Início'], ['tarefas', 'Tarefas'], ['mercado', 'Mercado'], ['sonhos', 'Sonhos'],
-    ['financas', 'Finanças'], ['contas', 'Contas'], ['agenda', 'Agenda'], ['relax', 'Relaxamento'],
+    ['inicio', '🏠', 'Início'], ['tarefas', '🧹', 'Tarefas'], ['mercado', '🛒', 'Mercado'], ['sonhos', '🌈', 'Sonhos'],
+    ['financas', '📊', 'Finanças'], ['contas', '💸', 'Contas'], ['agenda', '📅', 'Agenda'], ['relax', '🛋️', 'Relaxamento'],
   ];
   let atual = null, pendente = null, segurando = false, adiado = false;
   /* Enquanto um boneco anda pela sala, não redesenha a tela (senão a animação some) */
@@ -14,7 +14,7 @@ const App = (() => {
 
   function nav() {
     const e = Store.get(), eu = Local.get().eu;
-    U.$('#menu').innerHTML = ROTAS.map(([id, nome]) => `<a href="#${id}" class="${id === atual ? 'ativo' : ''}"><span class="ic">${Pixel.icone(id)}</span><span>${nome}</span>${id === 'inicio' && Views.inicio.totalAlertas() ? '<i class="ponto-alerta"></i>' : ''}</a>`).join('');
+    U.$('#menu').innerHTML = ROTAS.map(([id, ic, nome]) => `<a href="#${id}" class="${id === atual ? 'ativo' : ''}"><span class="ic">${ic}</span><span>${nome}</span>${id === 'inicio' && Views.inicio.totalAlertas() ? '<i class="ponto-alerta"></i>' : ''}</a>`).join('');
     U.$('#quemSou').innerHTML = eu ? `<span class="avatar ${eu.toLowerCase()}">${U.esc(Store.nome(eu)).slice(0, 1).toUpperCase()}</span>` : '👤';
     U.$('#quemSou').title = eu ? `Usando como ${Store.nome(eu)}` : 'Escolher quem está usando';
     const [st] = Sync.status();
@@ -37,7 +37,7 @@ const App = (() => {
       if (novo) { novo.focus({ preventScroll: true }); if (sel) try { novo.setSelectionRange(...sel); } catch (e) {} }
     }
     nav();
-    document.title = `${ROTAS.find(x => x[0] === r)[1]} · Nosso Cantinho`;
+    document.title = `${ROTAS.find(x => x[0] === r)[2]} · Nosso Cantinho`;
   }
   // agrupa várias alterações e espera o foco mudar de campo antes de redesenhar
   const agendar = () => { if (segurando) { adiado = true; return; } clearTimeout(pendente); pendente = setTimeout(render, 0); };
@@ -170,8 +170,6 @@ const App = (() => {
     Store.assinar(sincronizarMusica);
     Musica.ouvir(() => { if (rota() === 'inicio') agendar(); });
     Sync.ouvir(() => nav());
-    U.$('.logo').innerHTML = `${Pixel.icone('coracao')} <span>Nosso Cantinho</span>`;
-    U.$('#config').innerHTML = Pixel.icone('config');
     render();
     // espera os dados compartilhados antes de decidir entre boas-vindas e "quem é você?"
     await Sync.iniciar();

@@ -50,7 +50,7 @@ const Pixel = (() => {
     const r = base.slice();
     camada.forEach((l, i) => {
       const y = inicio + i; if (y >= r.length) return;
-      r[y] = [...r[y]].map((c, x) => (l[x] && l[x] !== '.' ? l[x] : c)).join('');
+      r[y] = [...r[y]].map((c, x) => (l[x] === ' ' ? '.' : l[x] && l[x] !== '.' ? l[x] : c)).join('');
     });
     return r;
   };
@@ -158,22 +158,65 @@ const Pixel = (() => {
     rabico: { inicio: 8, l: ['......OXXO......', '......OxxO......', '......OHHO......', '......OHHO......', '......OHhO......', '......OHHO......', '.......OO.......'] },
   };
 
-  function personagem(cfg = {}) {
+  // Rosto virado para a direita (o da esquerda é o espelho): olho, bochecha rosada, nariz e boca
+  const ROSTO_DIR = [
+    '.........HHSSO  ',
+    '.........HSSSSO ',
+    '.........SSOSSO ',
+    '.........SSSSSSO',
+    '.........SPPSSO ',
+    '.........SSSRO  ',
+    '.........SSSO   ',
+    '.........OOO    ',
+  ];
+  const espelhar = l => [...l].reverse().join('');
+
+  function personagem(cfg = {}, rosto = null) {
     const p = { pele: 'branco', cabelo: 'castanho', penteado: 'curto', acessorio: 'nenhum', roupa: 'amarelo', corAcessorio: 'vermelho', ...cfg };
     const pele = PELES[p.pele] || PELES.branco, cab = CABELOS[p.cabelo] || CABELOS.castanho;
     let linhas = [...(CABECAS[p.penteado] || CABECAS.curto), ...CORPO];
     if (CAIMENTO[p.penteado]) linhas = sobrepor(linhas, CAIMENTO[p.penteado], 12);
     const enf = ENFEITES[p.acessorio];
     if (enf) linhas = sobrepor(linhas, enf.l, enf.inicio);
+    if (rosto === 'dir') linhas = sobrepor(linhas, ROSTO_DIR, 4);
+    if (rosto === 'esq') linhas = sobrepor(linhas, ROSTO_DIR.map(espelhar), 4);
     const roupa = cor(p.roupa), acc = cor(p.corAcessorio);
     const pal = {
       O: '#1E1E1E', H: cab[1], h: cab[2], S: pele[1], s: pele[2], T: roupa, t: escurecer(roupa, 0.2),
       P: '#34407A', K: '#1E1E1E', X: acc, x: escurecer(acc, 0.25), Y: '#FFD23F', W: '#FFFFFF',
+      R: '#D9536F',
     };
+    // no rosto, P é a bochecha rosada (as calças ficam nas linhas de baixo)
+    if (rosto) linhas = linhas.map((l, y) => (y >= 4 && y <= 11 ? l.replace(/P/g, 'B') : l));
+    pal.B = '#FF9AB0';
     if (p.penteado === 'coque' && !enf) pal.x = escurecer(cab[1], 0.3);
     return { linhas, pal };
   }
-  const desenharPersonagem = (cfg, x = 0, y = 0) => { const s = personagem(cfg); return grade(s.linhas, s.pal, x, y); };
+  const desenharPersonagem = (cfg, x = 0, y = 0, rosto = null) => { const s = personagem(cfg, rosto); return grade(s.linhas, s.pal, x, y); };
+
+  /* Regador (bico para a esquerda) */
+  const REGADOR = [
+    '......OOO..',
+    '.....O...O.',
+    'OO...OOOOOO',
+    'ObOOOBBBBBO',
+    '.ObbbBBBBBO',
+    '..OOOBBBBBO',
+    '.....OOOOOO',
+  ];
+  const regador = (x, y) => grade(REGADOR, { O: '#1E1E1E', B: '#3C8DDE', b: '#7CC4FF' }, x, y);
+
+  /* Cores de parede (tons pastel) e pisos */
+  const PAREDES = {
+    menta: ['Menta', '#E5F6EB'], creme: ['Creme', '#FFF4D6'], rosa: ['Rosa', '#FDE4EC'], azul: ['Azul-céu', '#E1EFFB'],
+    lilas: ['Lilás', '#EEE6F8'], amarelo: ['Amarelo', '#FFF3BF'], pessego: ['Pêssego', '#FFE3D1'], salvia: ['Sálvia', '#DCE8D2'],
+    cinza: ['Cinza', '#E9EAEE'], branco: ['Branco', '#FAFAFA'],
+  };
+  const PISOS = {
+    claro: ['Madeira clara', '#E9C77A', '#D9B25E'], mel: ['Madeira mel', '#F6D77A', '#E6C155'], escuro: ['Madeira escura', '#A8703F', '#8E5C31'],
+    cinza: ['Cimento', '#C9CCD1', '#B3B7BD'], carpete: ['Carpete verde', '#9BD9B0', '#86C79C'],
+  };
+  const parede = k => (PAREDES[k] || PAREDES.menta)[1];
 
   /* ---------- caixas ---------- */
   function caixa(r, x, y, w, h, borda, fill, raio = 2) {
@@ -275,6 +318,7 @@ const Pixel = (() => {
 
   return {
     grade, sobrepor, personagem, desenharPersonagem, caixa, rect, sofa, tv, rack, icone,
+    regador, PAREDES, PISOS, parede,
     CORES, PELES, CABELOS, PENTEADOS, ACESSORIOS, SOFAS, TVS, RACKS, cor, clarear, escurecer, misturar,
   };
 })();

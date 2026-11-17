@@ -17,6 +17,8 @@ const CASA_PADRAO = () => ({
   musica: { faixa: null },
   votos: {},
   planta: '',
+  parede: 'menta',
+  relax: { parede: 'creme', tapete: 'verde', piso: 'claro' },
 });
 
 /* Preferências só deste aparelho (quem está usando, config de sincronização) */
@@ -89,7 +91,7 @@ const Store = (() => {
     emit();
     if (novoDia) {
       const n = streak();
-      U.toast(`🔥 <b>${n} ${n === 1 ? 'dia seguido' : 'dias seguidos'}</b>! Ofensiva do casal mantida 💚`, 'festa');
+      U.toast(`❤️‍🔥 <b>${n} ${n === 1 ? 'dia seguido' : 'dias seguidos'}</b>! Ofensiva do casal mantida 💚`, 'festa');
     }
   }
 
