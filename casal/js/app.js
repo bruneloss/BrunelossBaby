@@ -80,6 +80,7 @@ const App = (() => {
         <p class="dica">Os dados ficam guardados no claude.ai e aparecem para vocês dois. Para o seu amor usar, compartilhe este link pelo botão <b>Compartilhar</b> do claude.ai, com permissão para editar.</p>
         <p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'offline', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'sem conexão' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>
         ` : `
+        ${Sync.configFixa() ? `<h3 class="sub">🔄 Casa online</h3><p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'ainda sem casa', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'erro' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>` : `
         <h3 class="sub">🔄 Usar nos dois celulares (sincronização)</h3>
         <p class="dica">Sem sincronização, os dados ficam só neste navegador. Para ver tudo nos dois aparelhos, crie um projeto gratuito no Firebase (veja o passo a passo no arquivo <b>LEIAME.md</b>) e cole aqui a configuração. Use o <b>mesmo código do casal</b> nos dois aparelhos.</p>
         <p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'só neste aparelho', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'erro' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>
@@ -87,7 +88,7 @@ const App = (() => {
           <label class="larga">Código do casal (combinem um código difícil de adivinhar)<input name="codigo" value="${U.esc(L.codigo || '')}" placeholder="ex.: nos-dois-${Math.random().toString(36).slice(2, 8)}" pattern="[A-Za-z0-9_\\-]{6,}" title="Pelo menos 6 letras, números, - ou _"></label>
           <label class="larga">Configuração do Firebase (firebaseConfig)<textarea name="cfg" rows="5" placeholder='{ apiKey: "...", authDomain: "...", projectId: "...", ... }'>${L.firebase ? U.esc(JSON.stringify(L.firebase, null, 1)) : ''}</textarea></label>
           <div class="botoes larga">${L.firebase ? '<button type="button" class="btn" id="desligarSync">Desligar</button>' : ''}<button class="btn primario">Conectar</button></div>
-        </form>`}
+        </form>`}`}
         <h3 class="sub">💾 Backup</h3>
         <div class="botoes">
           <button class="btn" id="exportar">⬇️ Baixar backup</button>
@@ -160,13 +161,15 @@ const App = (() => {
           <label>Nome do seu amor<input name="B" required maxlength="24" placeholder="Ex.: Ana"></label>
           <div class="botoes larga"><button class="btn primario">Começar ✨</button></div>
         </form>
-        <p class="dica">Já começaram no outro celular? Feche esta janela e vá em ⚙️ → Sincronização.</p>`,
+        <p class="dica">Seu amor já criou a casa? Peça o <b>link de convite</b> e abra por ele.</p>`,
     });
     U.$('#fBV', m.el).onsubmit = ev => {
       ev.preventDefault(); const f = ev.target;
       Local.set('eu', 'A');
       Store.atualizar(s => { s.casal.A = f.A.value.trim(); s.casal.B = f.B.value.trim(); });
       m.fechar();
+      // com o banco configurado, já cria a casa e mostra o convite
+      if (Sync.modo() !== 'artifact' && Sync.temConfig()) Sync.criarCasa().then(() => Casa.convite());
     };
   }
 

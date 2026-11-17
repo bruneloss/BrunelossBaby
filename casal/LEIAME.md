@@ -39,29 +39,53 @@ Em ⚙️ **Configurações**: nomes, "juntos desde", quem está usando o aparel
 
 Por padrão, tudo fica **salvo no navegador** do aparelho (localStorage; as fotos ficam no IndexedDB). Use ⚙️ → **Baixar backup** de vez em quando.
 
-## Usar nos dois celulares (sincronização gratuita com Firebase)
+## Casa compartilhada com link de convite (recomendado para editar juntos)
 
-1. Entre em <https://console.firebase.google.com> e clique em **Adicionar projeto** (o plano gratuito Spark é suficiente).
-2. No menu, abra **Build → Firestore Database → Criar banco de dados** e escolha uma região, por exemplo `southamerica-east1`.
-3. Na aba **Regras** do Firestore, cole o texto abaixo e publique:
+No claude.ai, quem é de fora da sua organização só consegue **ver** o link. Para os dois **editarem juntos**, use esta versão no GitHub Pages com um banco Firebase gratuito. Você só configura uma vez:
+
+### 1. Criar o banco (Firebase, grátis)
+1. Acesse <https://console.firebase.google.com> e clique em **Criar projeto** (pode desativar o Google Analytics).
+2. No menu da esquerda: **Criação → Firestore Database → Criar banco de dados**. Escolha `southamerica-east1` e o **modo de produção**.
+3. Na aba **Regras**, apague tudo, cole o texto abaixo e clique em **Publicar**:
    ```
    rules_version = '2';
    service cloud.firestore {
      match /databases/{database}/documents {
        match /casais/{codigo} {
-         allow read, write: if codigo.size() >= 6;
-         match /fotos/{foto} { allow read, write: if codigo.size() >= 6; }
+         allow read, write: if codigo.size() >= 10;
+         match /fotos/{foto} { allow read, write: if codigo.size() >= 10; }
        }
      }
    }
    ```
-4. Em **Configurações do projeto (⚙️) → Seus apps**, clique no ícone **Web `</>`** e registre um app. Copie o bloco `firebaseConfig = { ... }`.
-5. No site, abra ⚙️ → **Usar nos dois celulares**:
-   - cole o `firebaseConfig`;
-   - escolham um **código do casal** difícil de adivinhar, por exemplo `bruno-ana-x7k29q`;
-   - clique em **Conectar**.
-6. Repita o passo 5 no outro celular, **com o mesmo código**. Em cada aparelho, escolha quem está usando.
+4. Clique na engrenagem ⚙️ → **Configurações do projeto** → em "Seus apps", clique no ícone **`</>`** (Web), dê um nome e registre.
+5. Copie o bloco `firebaseConfig = { ... }` que aparece.
 
-A bolinha ao lado do ⚙️ fica **verde** quando está sincronizado.
+### 2. Colocar a configuração no site
+Abra o arquivo **`casal/js/config.js`** e troque `window.CONFIG_FIREBASE = null;` pelo bloco copiado:
+```js
+window.CONFIG_FIREBASE = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "...",
+};
+```
+Você pode editar direto no GitHub (abra o arquivo e clique no lápis ✏️) ou me pedir que eu coloque.
 
-> ⚠️ **Privacidade:** essas regras são simples. Qualquer pessoa que tiver a configuração do Firebase **e** o código do casal consegue ver os dados. Por isso, use um código longo e não compartilhe. Se a última alteração foi feita nos dois aparelhos ao mesmo tempo, vale a versão salva por último.
+### 3. Publicar no GitHub Pages
+1. No repositório, vá em **Settings → Pages**.
+2. Em *Source*, escolha **Deploy from a branch**, selecione a branch (a `main`, depois do merge) e a pasta `/ (root)`. Salve.
+3. Em 1–2 minutos o site fica em `https://<seu-usuario>.github.io/<repositório>/casal/`.
+   (No plano gratuito do GitHub, o Pages exige repositório público.)
+
+### 4. Criar a casa e convidar
+1. Abra o site, digite os dois nomes e clique em **Começar**. A casa é criada e aparece o **link de convite**.
+2. Mande o link (botão **Enviar pelo WhatsApp**). Quem abrir por ele entra na mesma casa e escolhe "quem é você".
+3. O convite fica sempre em ⚙️ → **Convidar meu amor para a casa**. A bolinha ao lado do ⚙️ fica verde quando está sincronizado.
+
+**Levar os dados do claude.ai para cá:** na versão do claude.ai, ⚙️ → **Baixar backup**; no site novo, ⚙️ → **Restaurar backup**.
+
+> ⚠️ O link de convite contém o código secreto da casa: quem tiver o link entra. Mande só para o seu amor. Se dois editarem a mesma coisa no mesmo segundo, vale a última alteração.

@@ -236,10 +236,26 @@ const Sync = (() => {
     return true;
   }
 
+  const configFirebase = () => Local.get().firebase || window.CONFIG_FIREBASE || null;
+  const novoCodigo = () => 'casa-' + Array.from(crypto.getRandomValues(new Uint8Array(9)), b => 'abcdefghjkmnpqrstuvwxyz23456789'[b % 31]).join('');
+
+  /* Abriu pelo link de convite (?casa=CODIGO): entra na casa */
+  function lerConvite() {
+    try {
+      const c = new URLSearchParams(location.search).get('casa');
+      if (c && /^[A-Za-z0-9_-]{6,}$/.test(c) && c !== Local.get().codigo) { Local.set('codigo', c); return true; }
+    } catch (e) {}
+    return false;
+  }
+
+  /* Resolve quando chega a primeira resposta do banco (ou após 8 s) */
   async function iniciarFirebase() {
-    const { firebase: cfg, codigo } = Local.get();
+    lerConvite();
+    const cfg = configFirebase(), { codigo } = Local.get();
     if (!cfg || !codigo) { setStatus('off'); return; }
     modo = 'firebase'; setStatus('conectando');
+    let pronto1; const primeira = new Promise(r => (pronto1 = r));
+    setTimeout(pronto1, 8000);
     try {
       await carregar(`https://www.gstatic.com/firebasejs/${V}/firebase-app-compat.js`);
       await carregar(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore-compat.js`);
@@ -249,20 +265,33 @@ const Sync = (() => {
       ref.onSnapshot(snap => {
         if (snap.metadata.hasPendingWrites) return;
         const local = Store.get();
-        if (!snap.exists) { enviar(true); setStatus('on'); return; }
+        if (!snap.exists) { enviar(true); setStatus('on'); pronto1(); return; }
         const d = snap.data();
         if ((d.atualizado || 0) > (local._atualizado || 0)) {
           try { Store.substituir(JSON.parse(d.estado), { silencioso: true }); } catch (e) { console.error(e); }
         } else if ((d.atualizado || 0) < (local._atualizado || 0)) enviar(true);
-        setStatus('on');
-      }, err => setStatus('erro', err.message));
-    } catch (e) { setStatus('erro', e.message || String(e)); }
+        setStatus('on'); pronto1();
+      }, err => { setStatus('erro', err.message); pronto1(); });
+    } catch (e) { setStatus('erro', e.message || String(e)); pronto1(); }
+    return primeira;
   }
+
+  /* Cria a casa do casal (código secreto) e começa a sincronizar */
+  async function criarCasa() {
+    if (!configFirebase()) return null;
+    if (!Local.get().codigo) Local.set('codigo', novoCodigo());
+    if (modo !== 'firebase') await iniciarFirebase();
+    return Local.get().codigo;
+  }
+  const linkConvite = () => {
+    const c = Local.get().codigo; if (!c) return null;
+    return location.origin + location.pathname + '?casa=' + encodeURIComponent(c);
+  };
 
   /* Resolve quando os dados compartilhados chegaram (ou desistiu de esperar) */
   async function iniciar() {
     if (await iniciarArtifact()) return pronto;
-    await iniciarFirebase();
+    return iniciarFirebase();
   }
 
   function enviar(agora = false) {
@@ -301,7 +330,8 @@ const Sync = (() => {
     try { const s = await d.get(); return s.exists ? s.data().data : null; } catch (e) { return null; }
   }
   return {
-    iniciar, enviar, enviarFoto, apagarFoto, baixarFoto,
+    iniciar, enviar, enviarFoto, apagarFoto, baixarFoto, criarCasa, linkConvite,
+    temConfig: () => !!configFirebase(), configFixa: () => !!window.CONFIG_FIREBASE,
     status: () => [status, detalhe], ouvir: f => ouvintes.add(f), modo: () => modo,
   };
 })();
