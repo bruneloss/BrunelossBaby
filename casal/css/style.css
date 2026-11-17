@@ -613,3 +613,9 @@ button.card-resumo { font: inherit; text-align: left; cursor: pointer; color: in
 @keyframes braco-desce { from { transform: rotate(0); } to { transform: rotate(-75deg); opacity: 0; } }
 .braco .agua { opacity: 0; }
 .braco.rega .agua { opacity: 1; }
+
+/* v9: casa online */
+.caixa-detalhe { border: 2px solid var(--preto); border-radius: 14px; padding: 10px 12px; margin-bottom: 10px; background: var(--fundo); }
+.caixa-detalhe summary { cursor: pointer; }
+.caixa-detalhe[open] summary { margin-bottom: 8px; }
+code { background: var(--cinza-claro); padding: 1px 5px; border-radius: 6px; font-size: .85em; }

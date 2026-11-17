@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Cada casa é um documento com um código secreto longo (vem no link de convite)
+    match /casais/{codigo} {
+      allow read, write: if codigo.size() >= 10;
+      match /fotos/{foto} { allow read, write: if codigo.size() >= 10; }
+    }
+  }
+}

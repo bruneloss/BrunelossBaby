@@ -81,14 +81,19 @@ const App = (() => {
         <p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'offline', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'sem conexão' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>
         ` : `
         ${Sync.configFixa() ? `<h3 class="sub">🔄 Casa online</h3><p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'ainda sem casa', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'erro' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>` : `
-        <h3 class="sub">🔄 Usar nos dois celulares (sincronização)</h3>
-        <p class="dica">Sem sincronização, os dados ficam só neste navegador. Para ver tudo nos dois aparelhos, crie um projeto gratuito no Firebase (veja o passo a passo no arquivo <b>LEIAME.md</b>) e cole aqui a configuração. Use o <b>mesmo código do casal</b> nos dois aparelhos.</p>
+        <h3 class="sub">🔄 Casa online (os dois celulares juntos)</h3>
         <p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'só neste aparelho', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'erro' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>
-        <form class="form-grade" id="fSync">
-          <label class="larga">Código do casal (combinem um código difícil de adivinhar)<input name="codigo" value="${U.esc(L.codigo || '')}" placeholder="ex.: nos-dois-${Math.random().toString(36).slice(2, 8)}" pattern="[A-Za-z0-9_\\-]{6,}" title="Pelo menos 6 letras, números, - ou _"></label>
-          <label class="larga">Configuração do Firebase (firebaseConfig)<textarea name="cfg" rows="5" placeholder='{ apiKey: "...", authDomain: "...", projectId: "...", ... }'>${L.firebase ? U.esc(JSON.stringify(L.firebase, null, 1)) : ''}</textarea></label>
-          <div class="botoes larga">${L.firebase ? '<button type="button" class="btn" id="desligarSync">Desligar</button>' : ''}<button class="btn primario">Conectar</button></div>
-        </form>`}`}
+        <details class="caixa-detalhe" ${L.firebase ? '' : 'open'}><summary><b>Recebi um link de convite</b></summary>
+          <form class="linha-form" id="fEntrar"><input name="link" placeholder="Cole aqui o link de convite" required><button class="btn primario">Entrar</button></form>
+        </details>
+        <details class="caixa-detalhe" ${L.firebase ? '' : 'open'}><summary><b>Sou quem cria a casa</b> (cola a configuração do Firebase)</summary>
+          <p class="dica">Crie o projeto gratuito no Firebase (passo a passo no <b>LEIAME.md</b>) e cole aqui o bloco <code>firebaseConfig</code>. Depois é só mandar o link de convite.</p>
+          <form class="form-grade" id="fSync">
+            <label class="larga">Configuração do Firebase<textarea name="cfg" rows="5" placeholder='const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "...", ... };'>${L.firebase ? U.esc(JSON.stringify(L.firebase, null, 1)) : ''}</textarea></label>
+            <div class="botoes larga">${L.firebase ? '<button type="button" class="btn" id="desligarSync">Desligar</button>' : ''}<button class="btn primario">Ligar a casa online</button></div>
+          </form>
+        </details>`}`}
+        ${App.podeInstalar() ? `<h3 class="sub">📲 App no celular</h3>${App.textoInstalar()}` : ''}
         <h3 class="sub">💾 Backup</h3>
         <div class="botoes">
           <button class="btn" id="exportar">⬇️ Baixar backup</button>
@@ -108,11 +113,21 @@ const App = (() => {
         ev.preventDefault(); const f = ev.target;
         const cfg = lerConfig(f.cfg.value);
         if (!cfg || !cfg.apiKey || !cfg.projectId) return U.toast('Não reconheci a configuração. Cole o bloco firebaseConfig inteiro.', 'erro');
-        const codigo = f.codigo.value.trim() || f.codigo.placeholder.replace('ex.: ', '');
-        Local.set('firebase', cfg); Local.set('codigo', codigo);
-        U.toast('Conectando… a página vai recarregar.');
+        Local.set('firebase', cfg);
+        Sync.novoCodigoSeFaltar();
+        Local.set('mostrarConvite', true);
+        U.toast('Ligando a casa… o app vai recarregar.');
         setTimeout(() => location.reload(), 700);
       };
+      const fe = U.$('#fEntrar', m.el);
+      if (fe) fe.onsubmit = ev => {
+        ev.preventDefault();
+        if (!Sync.lerConvite(ev.target.link.value.trim())) return U.toast('Esse link não parece um convite. Copie o link inteiro que seu amor mandou.', 'erro');
+        U.toast('Entrando na casa… o app vai recarregar.');
+        setTimeout(() => location.reload(), 700);
+      };
+      const inst = U.$('#instalarApp', m.el);
+      if (inst) inst.onclick = instalar;
       const des = U.$('#desligarSync', m.el);
       if (des) des.onclick = () => { Local.set('firebase', null); location.reload(); };
       U.$('#exportar', m.el).onclick = exportar;
@@ -122,6 +137,24 @@ const App = (() => {
       };
     };
     U.modal({ titulo: '⚙️ Configurações', aoAbrir: desenhar });
+  }
+
+  /* Instalar como app: Android/Chrome mostram o pedido; no iPhone é pelo menu Compartilhar */
+  let pedidoInstalar = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedidoInstalar = e; });
+  const instalado = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const ehIphone = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const podeInstalar = () => !instalado() && Sync.modo() !== 'artifact' && 'serviceWorker' in navigator;
+  const textoInstalar = () => pedidoInstalar
+    ? '<button class="btn primario largo" id="instalarApp">📲 Instalar o Nosso Cantinho</button>'
+    : ehIphone()
+      ? '<p class="dica">No iPhone: abra no <b>Safari</b>, toque em <b>Compartilhar</b> (quadrado com seta) e em <b>Adicionar à Tela de Início</b>. No app instalado, se pedir, cole de novo o link de convite.</p>'
+      : '<p class="dica">No Android: abra no <b>Chrome</b>, toque nos <b>⋮</b> e em <b>Instalar app</b> (ou "Adicionar à tela inicial").</p>';
+  async function instalar() {
+    if (!pedidoInstalar) return;
+    pedidoInstalar.prompt();
+    await pedidoInstalar.userChoice.catch(() => {});
+    pedidoInstalar = null;
   }
 
   // Aceita tanto JSON quanto o objeto JavaScript copiado do console do Firebase
@@ -161,13 +194,14 @@ const App = (() => {
           <label>Nome do seu amor<input name="B" required maxlength="24" placeholder="Ex.: Ana"></label>
           <div class="botoes larga"><button class="btn primario">Começar ✨</button></div>
         </form>
-        <p class="dica">Seu amor já criou a casa? Peça o <b>link de convite</b> e abra por ele.</p>`,
+        <p class="dica">Seu amor já criou a casa? Abra pelo <b>link de convite</b>, ou cole o link em ⚙️ → Casa online.</p>`,
     });
     U.$('#fBV', m.el).onsubmit = ev => {
       ev.preventDefault(); const f = ev.target;
       Local.set('eu', 'A');
       Store.atualizar(s => { s.casal.A = f.A.value.trim(); s.casal.B = f.B.value.trim(); });
       m.fechar();
+      if (!Sync.temConfig() && Sync.modo() !== 'artifact') setTimeout(config, 400); // próximo passo: ligar a casa online
       // com o banco configurado, já cria a casa e mostra o convite
       if (Sync.modo() !== 'artifact' && Sync.temConfig()) Sync.criarCasa().then(() => Casa.convite());
     };
@@ -186,6 +220,7 @@ const App = (() => {
     // espera os dados compartilhados antes de decidir entre boas-vindas e "quem é você?"
     await Sync.iniciar();
     await Casa.iniciar();
+    if (Local.get().mostrarConvite && Sync.linkConvite()) { Local.set('mostrarConvite', false); Casa.convite(); }
     sincronizarMusica();
     const e = Store.get();
     const semNomes = e.casal.A === 'Amor 1' && e.casal.B === 'Amor 2';
@@ -196,7 +231,7 @@ const App = (() => {
     setInterval(() => { if (U.hoje() !== dia) { dia = U.hoje(); render(); } }, 60000);
   }
 
-  return { render, iniciar, segurar };
+  return { render, iniciar, segurar, podeInstalar, textoInstalar };
 })();
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', App.iniciar); else App.iniciar();

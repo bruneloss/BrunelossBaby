@@ -39,53 +39,32 @@ Em ⚙️ **Configurações**: nomes, "juntos desde", quem está usando o aparel
 
 Por padrão, tudo fica **salvo no navegador** do aparelho (localStorage; as fotos ficam no IndexedDB). Use ⚙️ → **Baixar backup** de vez em quando.
 
-## Casa compartilhada com link de convite (recomendado para editar juntos)
+## 📲 App no celular, sincronizado entre vocês dois (sem custo)
 
-No claude.ai, quem é de fora da sua organização só consegue **ver** o link. Para os dois **editarem juntos**, use esta versão no GitHub Pages com um banco Firebase gratuito. Você só configura uma vez:
+O Nosso Cantinho vira um **app de celular** (ícone na tela inicial, abre em tela cheia e funciona sem internet). Os dados ficam num **Firebase gratuito** (plano Spark, sem cartão). Quem cria a casa faz os 3 passos abaixo uma vez. Quem é convidado só abre o link.
 
-### 1. Criar o banco (Firebase, grátis)
-1. Acesse <https://console.firebase.google.com> e clique em **Criar projeto** (pode desativar o Google Analytics).
-2. No menu da esquerda: **Criação → Firestore Database → Criar banco de dados**. Escolha `southamerica-east1` e o **modo de produção**.
-3. Na aba **Regras**, apague tudo, cole o texto abaixo e clique em **Publicar**:
-   ```
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /casais/{codigo} {
-         allow read, write: if codigo.size() >= 10;
-         match /fotos/{foto} { allow read, write: if codigo.size() >= 10; }
-       }
-     }
-   }
-   ```
-4. Clique na engrenagem ⚙️ → **Configurações do projeto** → em "Seus apps", clique no ícone **`</>`** (Web), dê um nome e registre.
-5. Copie o bloco `firebaseConfig = { ... }` que aparece.
+### Passo 1: publicar o app (GitHub Pages, grátis)
+1. No GitHub, abra o repositório → **Settings** → **Pages**.
+2. Em **Source**, escolha **Deploy from a branch**. Em **Branch**, escolha `claude/couple-interactive-site-j5q8ln` (ou `main`, se fizer o merge), pasta **`/ (root)`**, e clique em **Save**.
+3. Em 1–2 minutos o app fica em: **https://bruneloss.github.io/Campanha-Guerra-Sombria/casal/**
 
-### 2. Colocar a configuração no site
-Abra o arquivo **`casal/js/config.js`** e troque `window.CONFIG_FIREBASE = null;` pelo bloco copiado:
-```js
-window.CONFIG_FIREBASE = {
-  apiKey: "...",
-  authDomain: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "...",
-};
-```
-Você pode editar direto no GitHub (abra o arquivo e clique no lápis ✏️) ou me pedir que eu coloque.
+### Passo 2: criar o banco (Firebase, grátis)
+1. Entre em <https://console.firebase.google.com> com sua conta Google e clique em **Criar um projeto** (ex.: `nosso-cantinho`). Pode desativar o Google Analytics.
+2. No menu: **Criação** (Build) → **Firestore Database** → **Criar banco de dados** → local `southamerica-east1` (São Paulo) → **modo de produção**.
+3. Na aba **Regras**, apague tudo, cole o conteúdo do arquivo [`firestore.rules`](firestore.rules) e clique em **Publicar**.
+4. Clique na ⚙️ → **Configurações do projeto** → em **Seus apps**, clique no ícone **`</>`** (Web) → dê um nome → **Registrar app**.
+5. Copie o bloco que aparece (`const firebaseConfig = { ... };`).
 
-### 3. Publicar no GitHub Pages
-1. No repositório, vá em **Settings → Pages**.
-2. Em *Source*, escolha **Deploy from a branch**, selecione a branch (a `main`, depois do merge) e a pasta `/ (root)`. Salve.
-3. Em 1–2 minutos o site fica em `https://<seu-usuario>.github.io/<repositório>/casal/`.
-   (No plano gratuito do GitHub, o Pages exige repositório público.)
+### Passo 3: ligar a casa e convidar
+1. Abra o app no celular, digite os dois nomes e toque em **Começar**.
+2. Abre a tela **⚙️ → Casa online → "Sou quem cria a casa"**: cole o bloco do Firebase e toque em **Ligar a casa online**.
+3. Aparece o **link de convite** → toque em **Enviar pelo WhatsApp**.
+4. Seu amor abre o link, escolhe "quem é você" e pronto: o que um faz, o outro vê.
 
-### 4. Criar a casa e convidar
-1. Abra o site, digite os dois nomes e clique em **Começar**. A casa é criada e aparece o **link de convite**.
-2. Mande o link (botão **Enviar pelo WhatsApp**). Quem abrir por ele entra na mesma casa e escolhe "quem é você".
-3. O convite fica sempre em ⚙️ → **Convidar meu amor para a casa**. A bolinha ao lado do ⚙️ fica verde quando está sincronizado.
+### Instalar como app
+- **Android (Chrome):** ⋮ → **Instalar app** (ou ⚙️ → **Instalar o Nosso Cantinho**).
+- **iPhone (Safari):** botão **Compartilhar** → **Adicionar à Tela de Início**. No iPhone o app instalado começa vazio: abra ⚙️ → **"Recebi um link de convite"** e cole o link (vale também para quem criou a casa, usando o próprio link de convite).
 
-**Levar os dados do claude.ai para cá:** na versão do claude.ai, ⚙️ → **Baixar backup**; no site novo, ⚙️ → **Restaurar backup**.
+**Levar os dados da versão do claude.ai:** lá, ⚙️ → **Baixar backup**; no app, ⚙️ → **Restaurar backup**.
 
-> ⚠️ O link de convite contém o código secreto da casa: quem tiver o link entra. Mande só para o seu amor. Se dois editarem a mesma coisa no mesmo segundo, vale a última alteração.
+> ⚠️ O link de convite tem o código secreto da casa: quem tiver o link entra. Mande só para o seu amor. Se os dois mudarem a mesma coisa no mesmo segundo, vale a última alteração. A cota grátis do Firebase (50 mil leituras e 20 mil gravações por dia) sobra para um casal.

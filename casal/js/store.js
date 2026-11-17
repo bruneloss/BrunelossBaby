@@ -239,13 +239,20 @@ const Sync = (() => {
   const configFirebase = () => Local.get().firebase || window.CONFIG_FIREBASE || null;
   const novoCodigo = () => 'casa-' + Array.from(crypto.getRandomValues(new Uint8Array(9)), b => 'abcdefghjkmnpqrstuvwxyz23456789'[b % 31]).join('');
 
-  /* Abriu pelo link de convite (?casa=CODIGO): entra na casa */
-  function lerConvite() {
+  /* Configuração do Firebase viaja no link de convite em base64 (não é senha; a casa é protegida pelo código) */
+  const cfgParaTexto = cfg => btoa(unescape(encodeURIComponent(JSON.stringify(cfg)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const textoParaCfg = t => { try { return JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g, '+').replace(/_/g, '/'))))); } catch (e) { return null; } };
+
+  /* Lê ?casa=CODIGO&fb=CONFIG de uma URL (a do navegador ou um link colado) e entra na casa */
+  function lerConvite(url = location.href) {
     try {
-      const c = new URLSearchParams(location.search).get('casa');
-      if (c && /^[A-Za-z0-9_-]{6,}$/.test(c) && c !== Local.get().codigo) { Local.set('codigo', c); return true; }
-    } catch (e) {}
-    return false;
+      const q = new URL(url).searchParams;
+      const c = q.get('casa'), fb = q.get('fb');
+      let mudou = false;
+      if (fb && !window.CONFIG_FIREBASE) { const cfg = textoParaCfg(fb); if (cfg && cfg.apiKey && cfg.projectId) { Local.set('firebase', cfg); mudou = true; } }
+      if (c && /^[A-Za-z0-9_-]{6,}$/.test(c) && c !== Local.get().codigo) { Local.set('codigo', c); mudou = true; }
+      return mudou;
+    } catch (e) { return false; }
   }
 
   /* Resolve quando chega a primeira resposta do banco (ou após 8 s) */
@@ -261,6 +268,8 @@ const Sync = (() => {
       await carregar(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore-compat.js`);
       const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(cfg);
       const db = firebase.firestore(app);
+      // guarda uma cópia no aparelho: o app abre e funciona mesmo sem internet
+      try { await db.enablePersistence({ synchronizeTabs: true }); } catch (e) {}
       ref = db.collection('casais').doc(codigo);
       ref.onSnapshot(snap => {
         if (snap.metadata.hasPendingWrites) return;
@@ -285,8 +294,11 @@ const Sync = (() => {
   }
   const linkConvite = () => {
     const c = Local.get().codigo; if (!c) return null;
-    return location.origin + location.pathname + '?casa=' + encodeURIComponent(c);
+    let link = location.origin + location.pathname + '?casa=' + encodeURIComponent(c);
+    if (!window.CONFIG_FIREBASE && Local.get().firebase) link += '&fb=' + cfgParaTexto(Local.get().firebase);
+    return link;
   };
+  const novoCodigoSeFaltar = () => { if (!Local.get().codigo) Local.set('codigo', novoCodigo()); };
 
   /* Resolve quando os dados compartilhados chegaram (ou desistiu de esperar) */
   async function iniciar() {
@@ -330,7 +342,7 @@ const Sync = (() => {
     try { const s = await d.get(); return s.exists ? s.data().data : null; } catch (e) { return null; }
   }
   return {
-    iniciar, enviar, enviarFoto, apagarFoto, baixarFoto, criarCasa, linkConvite,
+    iniciar, enviar, enviarFoto, apagarFoto, baixarFoto, criarCasa, linkConvite, lerConvite, novoCodigoSeFaltar,
     temConfig: () => !!configFirebase(), configFixa: () => !!window.CONFIG_FIREBASE,
     status: () => [status, detalhe], ouvir: f => ouvintes.add(f), modo: () => modo,
   };
