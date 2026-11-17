@@ -158,17 +158,76 @@ const Pixel = (() => {
     rabico: { inicio: 8, l: ['......OXXO......', '......OxxO......', '......OHHO......', '......OHHO......', '......OHhO......', '......OHHO......', '.......OO.......'] },
   };
 
-  // Rosto virado para a direita (o da esquerda é o espelho): olho, bochecha rosada, nariz e boca
-  const ROSTO_DIR = [
-    '.........HHSSO  ',
-    '.........HSSSSO ',
-    '.........SSOSSO ',
-    '.........SSSSSSO',
-    '.........SPPSSO ',
-    '.........SSSRO  ',
-    '.........SSSO   ',
-    '.........OOO    ',
-  ];
+  // Cabeça de perfil, virada para a direita (a esquerda é o espelho): cabelo atrás,
+  // uma orelha no meio (s), olho, bochecha rosada (B), nariz e boca (R)
+  const PERFIL = {
+    curto: [
+      '....OOOOOO......',
+      '..OOHHHHHHOO....',
+      '.OHHHhhHHHHHO...',
+      'OHHHhhHHHHHHHO..',
+      'OHHHHHHHHHHSSO..',
+      'OHHHHHHHSSSSSSO.',
+      'OHHHHHsSSSSOSSO.',
+      'OHHHHsssSSSSSSSO',
+      '.OHHHHsSSSBBSSO.',
+      '..OHHHSSSSSSRO..',
+      '...OOHSSSSSSO...',
+      '.....OOsSSOO....',
+    ],
+    longo: [
+      '....OOOOOO......',
+      '..OOHHHHHHOO....',
+      '.OHHHhhHHHHHO...',
+      'OHHHhhHHHHHHHO..',
+      'OHHHHHHHHHHSSO..',
+      'OHHHHHHHHSSSSSO.',
+      'OHHHHHHHsSSOSSO.',
+      'OHHHHHHsssSSSSSO',
+      'OHHHHHHHsSBBSSO.',
+      'OHHHHHHHSSSSRO..',
+      'OHHHHHHHSSSSO...',
+      'OHHHHHHHOsSOO...',
+    ],
+    cacheado: [
+      '...OO.OO.OO.....',
+      '.OOHHOHHOHHOO...',
+      'OHHhHHHHhHHHHO..',
+      'OHHHHHhHHHHHHHO.',
+      'OHhHHHHHhHHSSSO.',
+      'OHHHHhHHHSSSSSO.',
+      'OHHHHHHsSSSOSSO.',
+      'OHhHHHsssSSSSSSO',
+      'OHHHHHHsSSBBSSO.',
+      'OHHhHHHSSSSSRO..',
+      '.OHHHHHSSSSSO...',
+      '..OHOHHOsSOO....',
+    ],
+    coque: [
+      '..OOOO..........',
+      '.OHhHHO.........',
+      '.OHHHHOOOOOO....',
+      '..OxxOHHHHHHOO..',
+      '.OHHHhhHHHHHHO..',
+      'OHHHHHHHHHSSSSO.',
+      'OHHHHHsSSSSOSSO.',
+      'OHHHHsssSSSSSSSO',
+      'OHHHHHsSSSBBSSO.',
+      '.OHHHHSSSSSSRO..',
+      '..OOOHSSSSSSO...',
+      '.....OOsSSOO....',
+    ],
+  };
+  const CAIMENTO_PERFIL = {
+    longo: ['OHHHHHHO........', 'OHHHHHHO........', '.OHHHHHO........', '.OHHHhHO........', '..OHHHO.........', '...OOO..........'],
+  };
+  // enfeites que mudam de lugar quando a cabeça vira
+  const ENFEITES_PERFIL = {
+    rabico: { inicio: 4, l: ['OXXO', 'OxxO', 'OHHO', 'OHHO', 'OHhO', '.OO.'] },
+    bone: { inicio: 0, l: ['....OOOOOO......', '..OOXXXXXXOO....', '.OXXXXXxXXXXO...', 'OXXXXXXXXXXXXOO.', 'OxxxxxxxxxxxxxxO'] },
+    flor: { inicio: 2, l: ['.OXO', 'OXYXO', '.OXO'] },
+    presilha: { inicio: 2, l: ['....OXXO', '....OxXO', '.....OO.'] },
+  };
   const espelhar = l => [...l].reverse().join('');
 
   // Poses: passos da caminhada (pernas alternadas) e braço esquerdo livre para segurar o regador
@@ -181,21 +240,20 @@ const Pixel = (() => {
   function personagem(cfg = {}, rosto = null, pose = null) {
     const p = { pele: 'branco', cabelo: 'castanho', penteado: 'curto', acessorio: 'nenhum', roupa: 'amarelo', corAcessorio: 'vermelho', ...cfg };
     const pele = PELES[p.pele] || PELES.branco, cab = CABELOS[p.cabelo] || CABELOS.castanho;
-    let linhas = [...(CABECAS[p.penteado] || CABECAS.curto), ...CORPO];
-    if (CAIMENTO[p.penteado]) linhas = sobrepor(linhas, CAIMENTO[p.penteado], 12);
-    const enf = ENFEITES[p.acessorio];
+    const cabeca = rosto ? (PERFIL[p.penteado] || PERFIL.curto) : (CABECAS[p.penteado] || CABECAS.curto);
+    let linhas = [...cabeca, ...CORPO];
+    const cai = rosto ? CAIMENTO_PERFIL[p.penteado] : CAIMENTO[p.penteado];
+    if (cai) linhas = sobrepor(linhas, cai, 12);
+    const enf = rosto ? (ENFEITES_PERFIL[p.acessorio] || ENFEITES[p.acessorio]) : ENFEITES[p.acessorio];
     if (enf) linhas = sobrepor(linhas, enf.l, enf.inicio);
     if (POSES[pose]) linhas = sobrepor(linhas, POSES[pose].l, POSES[pose].inicio);
-    if (rosto === 'dir') linhas = sobrepor(linhas, ROSTO_DIR, 4);
-    if (rosto === 'esq') linhas = sobrepor(linhas, ROSTO_DIR.map(espelhar), 4);
+    if (rosto === 'esq') linhas = linhas.map(espelhar);
     const roupa = cor(p.roupa), acc = cor(p.corAcessorio);
     const pal = {
       O: '#1E1E1E', H: cab[1], h: cab[2], S: pele[1], s: pele[2], T: roupa, t: escurecer(roupa, 0.2),
       P: '#34407A', K: '#1E1E1E', X: acc, x: escurecer(acc, 0.25), Y: '#FFD23F', W: '#FFFFFF',
       R: '#D9536F',
     };
-    // no rosto, P é a bochecha rosada (as calças ficam nas linhas de baixo)
-    if (rosto) linhas = linhas.map((l, y) => (y >= 4 && y <= 11 ? l.replace(/P/g, 'B') : l));
     pal.B = '#FF9AB0';
     if (p.penteado === 'coque' && !enf) pal.x = escurecer(cab[1], 0.3);
     return { linhas, pal };
@@ -211,20 +269,18 @@ const Pixel = (() => {
   /* Braço esquerdo levantado segurando o regador (desenhado fora do corpo, gira a partir do ombro) */
   function bracoRegador(cfg = {}) {
     const roupa = cor(cfg.roupa || 'amarelo'), pele = (PELES[cfg.pele] || PELES.branco)[1], O = '#1E1E1E';
-    return regador(-16, 8)
-      + rect(-5, 12, 8, 5, O) + rect(-4, 13, 6, 3, roupa) + rect(-4, 15, 6, 1, escurecer(roupa, 0.2))
-      + rect(-8, 11, 4, 5, O) + rect(-7, 12, 2, 3, pele);
+    return regador(-11, 9)
+      + rect(-3, 13, 5, 3, O) + rect(-2, 14, 4, 1, roupa)
+      + rect(-5, 12, 3, 3, O) + rect(-4, 13, 1, 1, pele);
   }
 
   /* Regador (bico para a esquerda) */
   const REGADOR = [
-    '......OOO..',
-    '.....O...O.',
-    'OO...OOOOOO',
-    'ObOOOBBBBBO',
-    '.ObbbBBBBBO',
-    '..OOOBBBBBO',
-    '.....OOOOOO',
+    '.....OOO.',
+    'O...OO.OO',
+    'ObOOOBBBO',
+    '.ObbBBBBO',
+    '..OOOOOOO',
   ];
   const regador = (x, y) => grade(REGADOR, { O: '#1E1E1E', B: '#3C8DDE', b: '#7CC4FF' }, x, y);
 

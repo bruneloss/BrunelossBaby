@@ -2,7 +2,7 @@
 
 const Cena = (() => {
   const ASSENTO = { A: [58, 50], B: [86, 50] };
-  const EM_PE = 40;
+  const EM_PE = 42;
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const casa = () => ({ ...CASA_PADRAO(), ...(Store.get().casa || {}) });
 
@@ -18,9 +18,10 @@ const Cena = (() => {
     for (let x = 3; x < 160; x += 10) R(x, 0, 4, 68, Pixel.escurecer(pr, 0.05));
     for (let x = 8; x < 160; x += 20) for (let y = 6; y < 66; y += 14) R(x, y, 1, 1, '#FFFFFF');
     R(0, 66, 160, 2, '#FFFFFF'); R(0, 68, 160, 1, O);
-    R(0, 69, 160, 31, '#F6D77A');
-    for (let y = 74; y < 100; y += 6) R(0, y, 160, 1, '#E6C155');
-    for (let i = 0; i < 8; i++) R((i * 23 + (i % 2) * 9) % 160, 69 + (i % 5) * 6, 1, 5, '#E6C155');
+    const piso = Pixel.PISOS[c.piso] || Pixel.PISOS.mel;
+    R(0, 69, 160, 31, piso[1]);
+    for (let y = 74; y < 100; y += 6) R(0, y, 160, 1, piso[2]);
+    for (let i = 0; i < 8; i++) R((i * 23 + (i % 2) * 9) % 160, 69 + (i % 5) * 6, 1, 5, piso[2]);
 
     // quadrinho com o coração do nível de amor
     Pixel.caixa(r, 9, 14, 19, 16, O, '#FFFFFF');
@@ -45,7 +46,7 @@ const Cena = (() => {
 
     // luminária
     r.push('<circle cx="151" cy="32" r="13" fill="#FFD23F" opacity=".22" class="brilho"/>');
-    R(150, 34, 2, 33, O); R(145, 66, 12, 3, O);
+    R(150, 32, 2, 35, O); R(145, 66, 12, 3, O);
     R(144, 24, 14, 2, O); R(143, 26, 16, 6, O); R(145, 26, 12, 5, '#FFD23F'); R(144, 31, 14, 1, O);
 
     // rack e TV
@@ -79,7 +80,7 @@ const Cena = (() => {
     return {
       svg: abre + r.join('') + '</svg>',
       // camada por cima da tela da TV: quem levanta para andar vai para cá
-      topo: '<svg class="cena-svg cena-topo" viewBox="0 0 160 100" shape-rendering="crispEdges" aria-hidden="true"><g id="em-pe"></g></svg>',
+      topo: `<svg class="cena-svg cena-topo" viewBox="0 0 160 100" shape-rendering="crispEdges" aria-hidden="true"><g id="em-pe"></g>${Pixel.sofa(c.sofa.estilo, c.sofa.cor)}</svg>`,
       tela: tv.tela,
     };
   }
@@ -130,7 +131,7 @@ const Cena = (() => {
       // o braço esquerdo sai do corpo, sobe com o regador, inclina e a água cai no vaso
       corpo.innerHTML = Pixel.desenharPersonagem(cfg, 0, 0, null, 'regar');
       extra.innerHTML = `<g class="braco sobe">${Pixel.bracoRegador(cfg)}`
-        + `<g class="agua">${[0, 1, 2, 3].map(i => `<rect class="pingo p${i}" x="${-17 + (i % 2)}" y="11" width="1" height="2" fill="#7CC4FF"/>`).join('')}</g></g>`;
+        + `<g class="agua">${[0, 1, 2, 3].map(i => `<rect class="pingo p${i}" x="${-12 + (i % 2)}" y="11" width="1" height="2" fill="#7CC4FF"/>`).join('')}</g></g>`;
       el.classList.add('regando');
       const braco = U.$('.braco', extra);
       await sleep(450);

@@ -18,6 +18,7 @@ const CASA_PADRAO = () => ({
   votos: {},
   planta: '',
   parede: 'menta',
+  piso: 'mel',
   relax: { parede: 'creme', tapete: 'verde', piso: 'claro' },
 });
 

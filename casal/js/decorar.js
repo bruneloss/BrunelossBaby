@@ -23,7 +23,7 @@ const Decorar = (() => {
   function corpo() {
     const c = Cena.casa(), e = Store.get();
     const abas = ambiente === 'sala'
-      ? [['A', e.casal.A], ['B', e.casal.B], ['sofa', 'Sofá'], ['tv', 'TV e rack'], ['parede', 'Parede']]
+      ? [['A', e.casal.A], ['B', e.casal.B], ['sofa', 'Sofá'], ['tv', 'TV e rack'], ['parede', 'Parede e piso']]
       : [['rparede', 'Parede e piso'], ['rtapete', 'Tapete'], ['A', e.casal.A], ['B', e.casal.B]];
     if (!abas.some(([k]) => k === aba)) aba = abas[0][0];
     let html = previa() + `
@@ -51,7 +51,8 @@ const Decorar = (() => {
         ${grupo('Estilo do rack', 'estilo', opcoes('estilo', Pixel.RACKS, c.rack.estilo))}
         ${grupo('Cor do rack', 'cor', opcoes('cor', Pixel.CORES, c.rack.cor, 'cor'))}</div>`;
     } else if (aba === 'parede') {
-      html += `<div class="deco-campos" data-alvo="parede">${grupo('Cor da parede da sala', '', opcoes('parede', Pixel.PAREDES, c.parede, 'cor'))}</div>`;
+      html += `<div class="deco-campos" data-alvo="parede">${grupo('Cor da parede da sala', '', opcoes('parede', Pixel.PAREDES, c.parede, 'cor'))}</div>
+        <div class="deco-campos" data-alvo="piso">${grupo('Piso da sala', '', opcoes('piso', Pixel.PISOS, c.piso || 'mel'))}</div>`;
     } else {
       const r = { ...CASA_PADRAO().relax, ...(c.relax || {}) };
       html += aba === 'rparede'
