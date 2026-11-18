@@ -12,4 +12,11 @@
      appId: "1:123456789:web:abc123",
    };
 */
-window.CONFIG_FIREBASE = null;
+window.CONFIG_FIREBASE = {
+  apiKey: "AIzaSyAmioMD1sgDqYZNKYC51RcRrkOhf4iF_Bo",
+  authDomain: "nosso-cantinho-e4ca8.firebaseapp.com",
+  projectId: "nosso-cantinho-e4ca8",
+  storageBucket: "nosso-cantinho-e4ca8.firebasestorage.app",
+  messagingSenderId: "500175030321",
+  appId: "1:500175030321:web:42ccf4d1bbe375c539ed10",
+};
