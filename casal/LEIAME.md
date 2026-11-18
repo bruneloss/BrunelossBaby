@@ -46,7 +46,7 @@ O Nosso Cantinho vira um **app de celular** (ícone na tela inicial, abre em tel
 ### Passo 1: publicar o app (GitHub Pages, grátis)
 1. No GitHub, abra o repositório → **Settings** → **Pages**.
 2. Em **Source**, escolha **Deploy from a branch**. Em **Branch**, escolha `claude/couple-interactive-site-j5q8ln` (ou `main`, se fizer o merge), pasta **`/ (root)`**, e clique em **Save**.
-3. Em 1–2 minutos o app fica em: **https://bruneloss.github.io/Campanha-Guerra-Sombria/casal/**
+3. Em 1–2 minutos o app fica em: **https://bruneloss.github.io/BrunelossBaby/casal/**
 
 ### Passo 2: criar o banco (Firebase, grátis)
 1. Entre em <https://console.firebase.google.com> com sua conta Google e clique em **Criar um projeto** (ex.: `nosso-cantinho`). Pode desativar o Google Analytics.
