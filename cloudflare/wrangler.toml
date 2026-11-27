@@ -1,0 +1,17 @@
+# Lembretes diários (sem endereço público: só roda nos horários abaixo)
+name = "nosso-cantinho-lembretes"
+main = "src/lembretes.js"
+compatibility_date = "2024-09-23"
+workers_dev = false
+
+[triggers]
+# 12:00 UTC = 9h em Brasília (contas e agenda) · 23:30 UTC = 20h30 (ofensiva em risco)
+crons = ["0 12 * * *", "30 23 * * *"]
+
+[[kv_namespaces]]
+binding = "CANTINHO"
+id = "adbe79ce4b6a4e2690e5c7b0bf426bb1"
+
+[vars]
+FIREBASE_PROJECT = "nosso-cantinho-e4ca8"
+FIREBASE_API_KEY = "AIzaSyAmioMD1sgDqYZNKYC51RcRrkOhf4iF_Bo"

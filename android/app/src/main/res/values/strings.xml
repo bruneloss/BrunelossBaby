@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_nome">Nosso Cantinho</string>
+    <string name="widget_pequeno">Ofensiva do casal</string>
+    <string name="widget_medio">Cantinho do dia</string>
+    <string name="widget_pequeno_desc">Dias de ofensiva com uma animação de vocês que muda toda semana</string>
+    <string name="widget_medio_desc">Ofensiva, último recadinho e prioridades pendentes</string>
+</resources>

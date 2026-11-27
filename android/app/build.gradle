@@ -1,0 +1,61 @@
+plugins {
+    id 'com.android.application'
+}
+
+def env = System.getenv()
+def fb = new Properties()
+file('firebase.properties').withInputStream { fb.load(it) }
+def versao = (env.VERSAO_CODIGO ?: '1') as int
+def site = env.URL_SITE ?: 'https://brunelossbaby-cantinho.pages.dev'
+def texto = { String v -> '"' + (v ?: '') + '"' }
+
+android {
+    namespace 'br.com.nossocantinho.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'br.com.nossocantinho.app'
+        minSdk 26
+        targetSdk 34
+        versionCode versao
+        versionName "1.0.${versao}"
+        buildConfigField 'String', 'URL_APP', texto('https://bruneloss.github.io/BrunelossBaby/casal/')
+        buildConfigField 'String', 'URL_SITE', texto(site)
+        buildConfigField 'String', 'FB_APP_ID', texto(fb.getProperty('FB_APP_ID'))
+        buildConfigField 'String', 'FB_API_KEY', texto(fb.getProperty('FB_API_KEY'))
+        buildConfigField 'String', 'FB_PROJECT_ID', texto(fb.getProperty('FB_PROJECT_ID'))
+        buildConfigField 'String', 'FB_SENDER_ID', texto(fb.getProperty('FB_SENDER_ID'))
+    }
+
+    buildFeatures { buildConfig true }
+
+    signingConfigs {
+        release {
+            if (env.KEYSTORE_ARQUIVO) {
+                storeFile file(env.KEYSTORE_ARQUIVO)
+                storePassword env.KEYSTORE_SENHA
+                keyAlias 'cantinho'
+                keyPassword env.KEYSTORE_SENHA
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig env.KEYSTORE_ARQUIVO ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.work:work-runtime:2.9.1'
+    implementation platform('com.google.firebase:firebase-bom:33.5.1')
+    implementation 'com.google.firebase:firebase-messaging'
+}

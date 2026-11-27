@@ -1,0 +1,12 @@
+# Site do app: página para baixar o APK + API de avisos (/api/registrar e /api/avisar)
+name = "brunelossbaby-cantinho"
+pages_build_output_dir = "publico"
+compatibility_date = "2024-09-23"
+
+[[kv_namespaces]]
+binding = "CANTINHO"
+id = "adbe79ce4b6a4e2690e5c7b0bf426bb1"
+
+[vars]
+FIREBASE_PROJECT = "nosso-cantinho-e4ca8"
+FIREBASE_API_KEY = "AIzaSyAmioMD1sgDqYZNKYC51RcRrkOhf4iF_Bo"
