@@ -1,17 +1,12 @@
-/* Configuração do Firebase (banco gratuito que deixa o casal editar junto pelo link de convite).
-   Cole aqui o bloco "firebaseConfig" do seu projeto Firebase (passo a passo no LEIAME.md).
-   Esses dados não são senha: quem protege a casa é o código secreto do convite e as regras do Firestore.
+/* Configuração do app.
+   - CONFIG_FIREBASE: o banco gratuito que deixa o casal editar junto (vem do console do Firebase).
+     Esses dados não são senha: quem protege a casa é o código secreto do convite e as regras do Firestore.
+   - CONFIG_AVISOS: servidor de avisos na Cloudflare (notificações do app Android).
+   - CONFIG_DOWNLOAD: página para baixar o app Android (APK). */
 
-   Exemplo:
-   window.CONFIG_FIREBASE = {
-     apiKey: "AIza...",
-     authDomain: "nosso-cantinho.firebaseapp.com",
-     projectId: "nosso-cantinho",
-     storageBucket: "nosso-cantinho.appspot.com",
-     messagingSenderId: "123456789",
-     appId: "1:123456789:web:abc123",
-   };
-*/
+window.CONFIG_AVISOS = 'https://brunelossbaby-cantinho.pages.dev/api';
+window.CONFIG_DOWNLOAD = 'https://brunelossbaby-cantinho.pages.dev/';
+
 window.CONFIG_FIREBASE = {
   apiKey: "AIzaSyAmioMD1sgDqYZNKYC51RcRrkOhf4iF_Bo",
   authDomain: "nosso-cantinho-e4ca8.firebaseapp.com",

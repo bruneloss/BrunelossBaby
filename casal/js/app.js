@@ -144,12 +144,15 @@ const App = (() => {
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedidoInstalar = e; });
   const instalado = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
   const ehIphone = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const podeInstalar = () => !instalado() && Sync.modo() !== 'artifact' && 'serviceWorker' in navigator;
-  const textoInstalar = () => pedidoInstalar
+  const podeInstalar = () => !Nativo.noApp && Sync.modo() !== 'artifact' && (window.CONFIG_DOWNLOAD || (!instalado() && 'serviceWorker' in navigator));
+  const textoInstalar = () => (window.CONFIG_DOWNLOAD && /android/i.test(navigator.userAgent)
+    ? `<a class="btn primario largo" href="${window.CONFIG_DOWNLOAD}" target="_blank" rel="noopener">📲 Baixar o app Android (widgets e notificações)</a>
+       <p class="dica">O app Android tem os widgets da ofensiva e avisa quando chega recadinho, beijinho, prioridade, conta vencendo e evento do dia.</p>`
+    : '') + (instalado() ? '' : pedidoInstalar
     ? '<button class="btn primario largo" id="instalarApp">📲 Instalar o Nosso Cantinho</button>'
     : ehIphone()
       ? '<p class="dica">No iPhone: abra no <b>Safari</b>, toque em <b>Compartilhar</b> (quadrado com seta) e em <b>Adicionar à Tela de Início</b>. No app instalado, se pedir, cole de novo o link de convite.</p>'
-      : '<p class="dica">No Android: abra no <b>Chrome</b>, toque nos <b>⋮</b> e em <b>Instalar app</b> (ou "Adicionar à tela inicial").</p>';
+      : /android/i.test(navigator.userAgent) && window.CONFIG_DOWNLOAD ? '' : '<p class="dica">No Android: abra no <b>Chrome</b>, toque nos <b>⋮</b> e em <b>Instalar app</b> (ou "Adicionar à tela inicial").</p>');
   async function instalar() {
     if (!pedidoInstalar) return;
     pedidoInstalar.prompt();
@@ -220,6 +223,7 @@ const App = (() => {
     // espera os dados compartilhados antes de decidir entre boas-vindas e "quem é você?"
     await Sync.iniciar();
     await Casa.iniciar();
+    Nativo.iniciar();
     if (Local.get().mostrarConvite && Sync.linkConvite()) { Local.set('mostrarConvite', false); Casa.convite(); }
     sincronizarMusica();
     const e = Store.get();

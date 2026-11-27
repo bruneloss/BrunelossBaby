@@ -68,3 +68,25 @@ O Nosso Cantinho vira um **app de celular** (ícone na tela inicial, abre em tel
 **Levar os dados da versão do claude.ai:** lá, ⚙️ → **Baixar backup**; no app, ⚙️ → **Restaurar backup**.
 
 > ⚠️ O link de convite tem o código secreto da casa: quem tiver o link entra. Mande só para o seu amor. Se os dois mudarem a mesma coisa no mesmo segundo, vale a última alteração. A cota grátis do Firebase (50 mil leituras e 20 mil gravações por dia) sobra para um casal.
+
+## 📲 App Android (APK) com widgets e notificações
+
+O APK abre o mesmo Nosso Cantinho (as mudanças do app continuam chegando sozinhas) e acrescenta:
+- **Widget pequeno:** dias de ofensiva com uma animação de vocês que muda a cada semana (10 em rodízio).
+- **Widget médio:** ofensiva, último recadinho e prioridades pendentes.
+- **Notificações com som próprio:** 💌 recadinho, 💋 beijinho, 🚨 prioridade nova, 💸 conta vencendo (hoje e amanhã, às 9h), 📅 evento do dia (às 9h) e ❤️‍🔥 ofensiva em risco (às 20h30).
+
+Tudo é montado e publicado sozinho pelo GitHub a cada merge na `main` (arquivo `.github/workflows/android.yml`):
+- o APK fica em **https://brunelossbaby-cantinho.pages.dev** (Cloudflare Pages, grátis);
+- os avisos passam pela API em `/api` (Cloudflare) e chegam pelo Firebase Cloud Messaging (grátis);
+- os lembretes diários rodam num Worker agendado da Cloudflare.
+
+### Configuração única (3 itens)
+1. **Firebase → app Android:** Visão geral do projeto → **+ Adicionar app** → ícone do **Android** → nome do pacote **`br.com.nossocantinho.app`** → Registrar → baixe o `google-services.json` e mande o conteúdo para o Claude (não é segredo). Ele preenche `android/app/firebase.properties`.
+2. **Firebase → chave de serviço (segredo):** ⚙️ Configurações do projeto → **Contas de serviço** → **Gerar nova chave privada**. No GitHub: **Settings → Secrets and variables → Actions → New repository secret**, nome **`FIREBASE_SERVICE_ACCOUNT`**, cole o conteúdo inteiro do arquivo `.json`. Não mande essa chave em conversa nenhuma.
+3. **Cloudflare → token (segredo):** no painel da Cloudflare, **My Profile → API Tokens → Create Token → modelo "Edit Cloudflare Workers"**; em **Permissions**, adicione também **Account → Cloudflare Pages → Edit**. Crie, copie e salve no GitHub como o segredo **`CLOUDFLARE_API_TOKEN`**.
+
+Depois disso, cada merge na `main` monta o APK, publica o site e atualiza os avisos. O app instalado avisa quando há versão nova do APK (só acontece se mudarmos widget ou notificações).
+
+### Sons
+Os sons ficam em `android/app/src/main/res/raw/` e são gerados por `android/sons/gerar_sons.py`. Para trocar um som, ajuste o script, rode de novo e mude a `VERSAO` em `Canais.java` (o Android guarda o som no canal).

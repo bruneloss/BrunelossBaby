@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1E1E1E">
+<title>Nosso Cantinho · baixar o app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --verde: #2E9E5B; --amarelo: #FFD23F; --preto: #1E1E1E; --fundo: #F8FCF6; --cinza: #5B5B5B; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Ubuntu', system-ui, sans-serif; background: var(--fundo); color: var(--preto);
+    background-image: radial-gradient(#E5F6EB 1.5px, transparent 1.5px); background-size: 22px 22px; }
+  main { max-width: 520px; margin: 0 auto; padding: 32px 16px 48px; display: flex; flex-direction: column; gap: 18px; }
+  .cartao { background: #fff; border: 3px solid var(--preto); border-radius: 22px; box-shadow: 4px 4px 0 var(--preto); padding: 22px; }
+  .topo { text-align: center; }
+  .icone { width: 96px; height: 96px; image-rendering: pixelated; }
+  h1 { margin: 10px 0 4px; font-size: 1.8rem; }
+  p { margin: 6px 0; line-height: 1.45; }
+  .baixar { display: block; text-align: center; background: var(--verde); color: #fff; font-weight: 700; font-size: 1.15rem; text-decoration: none;
+    border: 3px solid var(--preto); border-radius: 999px; padding: 14px 18px; box-shadow: 3px 3px 0 var(--preto); margin-top: 14px; }
+  .baixar:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--preto); }
+  .versao { text-align: center; color: var(--cinza); font-size: .85rem; margin-top: 8px; }
+  ol { padding-left: 22px; margin: 8px 0 0; display: flex; flex-direction: column; gap: 8px; }
+  h2 { font-size: 1.1rem; margin: 0 0 6px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; justify-content: center; }
+  .tag { border: 2px solid var(--preto); border-radius: 999px; padding: 3px 10px; font-size: .85rem; background: #FFF5CC; }
+</style>
+</head>
+<body>
+<main>
+  <section class="cartao topo">
+    <img class="icone" src="icone.png" alt="">
+    <h1>Nosso Cantinho</h1>
+    <p>O app do casal no Android, com <b>widgets</b> na tela inicial e <b>notificações</b>.</p>
+    <div class="tags"><span class="tag">❤️‍🔥 widget da ofensiva</span><span class="tag">💌 avisos de recadinho</span><span class="tag">💋 beijinhos</span><span class="tag">💸 contas</span></div>
+    <a class="baixar" href="nosso-cantinho.apk" download>⬇️ Baixar o app (APK)</a>
+    <p class="versao" id="versao">Android 8 ou mais novo</p>
+  </section>
+  <section class="cartao">
+    <h2>Como instalar</h2>
+    <ol>
+      <li>Toque em <b>Baixar o app</b> e abra o arquivo quando terminar.</li>
+      <li>Se o Android pedir, toque em <b>Configurações</b> e ative <b>Permitir desta fonte</b>. É normal para apps fora da Play Store.</li>
+      <li>Toque em <b>Instalar</b> e depois em <b>Abrir</b>.</li>
+      <li>No app, vá em ⚙️ → <b>Casa online</b> → <b>Recebi um link de convite</b> e cole o link da casa (só na primeira vez).</li>
+      <li>Aceite as <b>notificações</b> e escolha quem é você.</li>
+    </ol>
+  </section>
+  <section class="cartao">
+    <h2>Colocar o widget</h2>
+    <p>Segure o dedo num espaço vazio da tela inicial → <b>Widgets</b> → <b>Nosso Cantinho</b>. Tem o <b>pequeno</b> (ofensiva com animação de vocês, que muda toda semana) e o <b>médio</b> (ofensiva, último recadinho e prioridades).</p>
+  </section>
+</main>
+<script>
+  fetch('versao.json').then(r => r.json()).then(v => { document.getElementById('versao').textContent = 'Versão ' + v.nome + ' · Android 8 ou mais novo'; }).catch(() => {});
+</script>
+</body>
+</html>

@@ -134,6 +134,7 @@ Views.inicio = (() => {
       d.beijos[p] = (d.beijos[p] || 0) + 1;
       if (d.beijos[p] <= 6) ganhou = Amor.somar(s, 6, 'beijo');
     });
+    Nativo.avisar('beijo');
     U.toast(ganhou ? `💋 Beijinho em ${U.esc(Store.nome(outro(p)))}! +6 de amor` : '💋 Beijinho dado! (os pontos de beijo de hoje já acabaram)');
   }
 
@@ -241,6 +242,7 @@ Views.inicio = (() => {
             ev.preventDefault();
             const texto = ev.target.texto.value.trim(); if (!texto) return;
             Store.atualizar(s => { s.mensagens.push({ id: U.uid(), data: U.hoje(), autor, texto, criado: Date.now() }); Amor.somar(s, 12, 'recado'); });
+            Nativo.avisar('recado', texto);
             tvIdx = Store.get().mensagens.filter(x => x.data === U.hoje()).length - 1;
             mostrarFrase(false);
             const r = ev.target.getBoundingClientRect(); U.coracoes(r.left + r.width / 2, r.top);
@@ -291,6 +293,7 @@ Views.inicio = (() => {
             ev.preventDefault();
             const texto = ev.target.texto.value.trim(); if (!texto) return;
             Store.atualizar(s => s.prioridades.push({ id: U.uid(), texto, criado: U.hoje(), feito: false, autor: eu() }));
+            Nativo.avisar('prioridade', texto);
             desenhar(); U.$('input[name=texto]', m.el).focus();
           };
           U.$$('[data-feito]', m.el).forEach(c => c.onchange = () => {
