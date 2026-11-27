@@ -47,6 +47,10 @@ jobs:
         if: env.CLOUDFLARE_API_TOKEN != '' && env.FIREBASE_SERVICE_ACCOUNT != '' && github.ref == 'refs/heads/main'
         run: bash cloudflare/scripts/publicar.sh
 
+      - name: Conferir as chaves (sem publicar)
+        if: github.ref != 'refs/heads/main'
+        run: bash cloudflare/scripts/verificar.sh
+
       - name: Falta configurar
         if: env.CLOUDFLARE_API_TOKEN == '' || env.FIREBASE_SERVICE_ACCOUNT == ''
         run: echo "::notice::APK montado, mas não publicado. Faltam os segredos CLOUDFLARE_API_TOKEN e/ou FIREBASE_SERVICE_ACCOUNT (Settings → Secrets → Actions)."
