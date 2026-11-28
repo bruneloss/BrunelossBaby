@@ -619,3 +619,6 @@ button.card-resumo { font: inherit; text-align: left; cursor: pointer; color: in
 .caixa-detalhe summary { cursor: pointer; }
 .caixa-detalhe[open] summary { margin-bottom: 8px; }
 code { background: var(--cinza-claro); padding: 1px 5px; border-radius: 6px; font-size: .85em; }
+
+.destaque-convite { background: var(--amarelo-claro); }
+.destaque-convite .sub { margin-top: 0; }

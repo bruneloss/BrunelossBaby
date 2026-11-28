@@ -1,6 +1,6 @@
 /* Service worker: guarda os arquivos do app para abrir rápido e funcionar sem internet.
    Mude VERSAO quando publicar uma atualização (os celulares baixam a nova sozinhos). */
-const VERSAO = 'cantinho-v3';
+const VERSAO = 'cantinho-v4';
 const ARQUIVOS = ['./', './index.html', './manifest.webmanifest', './icones/icone-192.png', './icones/icone-512.png',   "./css/style.css",  "./js/agenda.js",  "./js/amor.js",  "./js/app.js",  "./js/casa.js",  "./js/cena.js",  "./js/config.js",  "./js/contas.js",  "./js/decorar.js",  "./js/financas.js",  "./js/inicio.js",  "./js/mercado.js",  "./js/musica.js",  "./js/nativo.js",  "./js/pixel.js",  "./js/relax.js",  "./js/sonhos.js",  "./js/store.js",  "./js/tarefas.js",  "./js/util.js"];
 
 self.addEventListener('install', e => {
