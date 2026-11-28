@@ -250,7 +250,7 @@ const Sync = (() => {
       const c = q.get('casa'), fb = q.get('fb');
       let mudou = false;
       if (fb && !window.CONFIG_FIREBASE) { const cfg = textoParaCfg(fb); if (cfg && cfg.apiKey && cfg.projectId) { Local.set('firebase', cfg); mudou = true; } }
-      if (c && /^[A-Za-z0-9_-]{6,}$/.test(c) && c !== Local.get().codigo) { Local.set('codigo', c); mudou = true; }
+      if (c && /^[A-Za-z0-9_-]{6,}$/.test(c) && c !== Local.get().codigo) { Local.set('codigo', c); Local.set('entrando', true); mudou = true; }
       return mudou;
     } catch (e) { return false; }
   }
@@ -274,8 +274,20 @@ const Sync = (() => {
       ref.onSnapshot(snap => {
         if (snap.metadata.hasPendingWrites) return;
         const local = Store.get();
-        if (!snap.exists) { enviar(true); setStatus('on'); pronto1(); return; }
+        const entrando = Local.get().entrando;
+        if (!snap.exists) {
+          if (snap.metadata.fromCache) return; // a cópia do aparelho ainda não sabe: espera o servidor
+          if (entrando) { setStatus('erro', 'Não achei essa casa. Confira se o link de convite está completo.'); pronto1(); return; }
+          enviar(true); setStatus('on'); pronto1(); return;
+        }
         const d = snap.data();
+        if (entrando) {
+          // entrou pelo convite: os dados da casa substituem os deste celular (nunca o contrário)
+          Local.set('entrando', false);
+          try { Store.substituir(JSON.parse(d.estado), { silencioso: true }); } catch (e) { console.error(e); }
+          setStatus('on'); pronto1();
+          return;
+        }
         if ((d.atualizado || 0) > (local._atualizado || 0)) {
           try { Store.substituir(JSON.parse(d.estado), { silencioso: true }); } catch (e) { console.error(e); }
         } else if ((d.atualizado || 0) < (local._atualizado || 0)) enviar(true);

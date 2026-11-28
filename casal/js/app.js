@@ -80,7 +80,12 @@ const App = (() => {
         <p class="dica">Os dados ficam guardados no claude.ai e aparecem para vocês dois. Para o seu amor usar, compartilhe este link pelo botão <b>Compartilhar</b> do claude.ai, com permissão para editar.</p>
         <p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'offline', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'sem conexão' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>
         ` : `
-        ${Sync.configFixa() ? `<h3 class="sub">🔄 Casa online</h3><p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'ainda sem casa', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'erro' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>` : `
+        ${Sync.configFixa() ? `<h3 class="sub">🔄 Casa online</h3><p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'ainda sem casa', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'erro' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>
+        ${L.codigo ? `<p class="dica">Código desta casa: <code>${U.esc(L.codigo)}</code>. Os dois celulares precisam mostrar o <b>mesmo código</b>.</p>` : ''}
+        <details class="caixa-detalhe" ${L.codigo ? '' : 'open'}><summary><b>Recebi um link de convite</b> (entrar na casa do meu amor)</summary>
+          <p class="dica">Cole o link que seu amor mandou. Este celular passa a mostrar os dados da casa dele(a).</p>
+          <form class="linha-form" id="fEntrar"><input name="link" placeholder="Cole aqui o link de convite" required><button class="btn primario">Entrar</button></form>
+        </details>` : `
         <h3 class="sub">🔄 Casa online (os dois celulares juntos)</h3>
         <p>Status: <span class="tag ${st === 'on' ? 'ok' : st === 'erro' ? 'perigo' : 'neutro'}">${{ off: 'só neste aparelho', conectando: 'conectando…', on: 'sincronizado ✔', erro: 'erro' }[st]}</span> ${det ? `<small>${U.esc(det)}</small>` : ''}</p>
         <details class="caixa-detalhe" ${L.firebase ? '' : 'open'}><summary><b>Recebi um link de convite</b></summary>
@@ -192,13 +197,24 @@ const App = (() => {
     const m = U.modal({
       titulo: '💚 Bem-vindos ao Nosso Cantinho!',
       corpo: `<p>Um cantinho só de vocês para recados, tarefas, sonhos, finanças e agenda.</p>
+        <div class="caixa-detalhe destaque-convite">
+          <h3 class="sub">💌 Seu amor já criou a casa?</h3>
+          <p class="dica">Cole aqui o link de convite que ele(a) mandou e você entra na mesma casa.</p>
+          <form class="linha-form" id="fBVConvite"><input name="link" placeholder="Cole o link de convite" required><button class="btn primario">Entrar</button></form>
+        </div>
+        <h3 class="sub">🏠 Ou crie uma casa nova</h3>
         <form class="form-grade" id="fBV">
-          <label>Seu nome<input name="A" required maxlength="24" autofocus placeholder="Ex.: Bruno"></label>
+          <label>Seu nome<input name="A" required maxlength="24" placeholder="Ex.: Bruno"></label>
           <label>Nome do seu amor<input name="B" required maxlength="24" placeholder="Ex.: Ana"></label>
-          <div class="botoes larga"><button class="btn primario">Começar ✨</button></div>
-        </form>
-        <p class="dica">Seu amor já criou a casa? Abra pelo <b>link de convite</b>, ou cole o link em ⚙️ → Casa online.</p>`,
+          <div class="botoes larga"><button class="btn">Criar a nossa casa ✨</button></div>
+        </form>`,
     });
+    U.$('#fBVConvite', m.el).onsubmit = ev => {
+      ev.preventDefault();
+      if (!Sync.lerConvite(ev.target.link.value.trim())) return U.toast('Esse link não parece um convite. Copie o link inteiro que seu amor mandou.', 'erro');
+      U.toast('Entrando na casa… 💚');
+      setTimeout(() => location.reload(), 600);
+    };
     U.$('#fBV', m.el).onsubmit = ev => {
       ev.preventDefault(); const f = ev.target;
       Local.set('eu', 'A');
